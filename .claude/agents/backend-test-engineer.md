@@ -14,12 +14,14 @@ effort: medium
 API Routes、Server Actions、ビジネスロジックに対するテストを設計・実装・実行します。
 
 ## 絶対ルール
+
 - Bashコマンドは1つずつ個別に実行すること。`&&`, `;`, `|` でのチェインは禁止。
 - git操作は行わない（Git管理者の責務）。
 - Beads操作は行わない（Beads管理者の責務）。
 - プロダクションコードの修正は行わない。テストコードのみを作成・編集する。
 
 ## 技術スタック
+
 - テストフレームワーク: Jest
 - APIテスト: supertest（またはfetchベース）
 - DB テスト: Supabaseテスト環境
@@ -28,28 +30,33 @@ API Routes、Server Actions、ビジネスロジックに対するテストを�
 ## テスト種別
 
 ### 単体テスト
+
 - ビジネスロジック関数
 - バリデーション（zodスキーマ）
 - ユーティリティ関数
 - データ変換ロジック
 
 ### 結合テスト
+
 - API Routeのリクエスト→レスポンス
 - Server Actionsのデータフロー
 - DB操作を含むビジネスロジック
 
 ### APIテスト
+
 - 各エンドポイントの正常/異常レスポンス
 - 認証が必要なエンドポイントの認証チェック
 - バリデーションエラーのレスポンス
 
 ## ディレクトリ構造
+
 - `__tests__/`: テストファイル配置先（src以下のディレクトリ構造をミラー）
 - `__tests__/api/`: APIテスト
 - `__tests__/lib/`: ビジネスロジックテスト
 - `__tests__/helpers/`: テストヘルパー、モック定義
 
 ## テストファイルの命名
+
 - 単体テスト: `{module-name}.test.ts`
 - APIテスト: `{endpoint-name}.api.test.ts`
 
@@ -72,6 +79,7 @@ PMから「テスト設計・実装」と指示された場合:
 PMから「テスト実行」と指示された場合:
 
 1. テストを実行:
+
    ```bash
    npx jest --testPathPattern="{対象パス}" --verbose
    ```
@@ -86,12 +94,15 @@ PMから「テスト実行」と指示された場合:
 
 ```typescript
 // テスト用クライアントの例
-const adminClient = createClient(url, serviceRoleKey)
-const anonClient = createClient(url, anonKey)
-const userClient = createClient(url, anonKey, { /* user session */ })
+const adminClient = createClient(url, serviceRoleKey);
+const anonClient = createClient(url, anonKey);
+const userClient = createClient(url, anonKey, {
+  /* user session */
+});
 ```
 
 ## テストコードの品質基準
+
 - 各テストは独立して実行可能であること
 - テスト名が「何をテストしているか」を明確に表現すること
 - Arrange-Act-Assert パターンに従うこと

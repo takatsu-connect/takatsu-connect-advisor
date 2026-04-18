@@ -12,16 +12,19 @@
 ## 技術スタック
 
 ### フレームワーク・デプロイ
+
 - フレームワーク: Next.js (App Router)
 - Node.js: 20.x LTS 以上
 - パッケージマネージャ: pnpm
 - デプロイ: Vercel
 
 ### データ・認証
+
 - DB: Supabase
 - Auth: Supabase Auth（招待制、Email/PW + Google OAuth）
 
 ### LLM / 外部連携
+
 - LLM: Anthropic Claude API（SDK: `@anthropic-ai/sdk`）
   - デフォルトモデル: `claude-sonnet-4-6`（環境変数 `CLAUDE_MODEL` で切替可能）
   - Prompt caching 有効
@@ -31,6 +34,7 @@
 - Webページ取得（任意URL）
 
 ### 開発・品質
+
 - タスク管理: Beads
 - テスト:
   - 単体・結合: Jest + React Testing Library
@@ -40,12 +44,14 @@
 ## Git戦略
 
 ### ブランチ構成
+
 - `release`: 正式版ブランチ（エージェント操作禁止）
 - `preview`: プレビュー版ブランチ（エージェント操作禁止）
 - `dev`: 開発ブランチ（featureブランチのマージ先）
 - `feature/bd-{beads-id}`: タスクごとのブランチ
 
 ### ルール
+
 - Git Worktreeを使い、並行で進められるタスクは並行で進める
 - featureブランチはBeadsのIDを使って命名する
 - release, previewブランチはエージェントが操作しない

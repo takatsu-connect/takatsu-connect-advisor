@@ -19,19 +19,19 @@
 
 ## 2. 設計ドキュメント一覧
 
-| ドキュメント | 内容 |
-|---|---|
-| [overview.md](./overview.md) | 本書（全体像 + 各ドキュメントへのリンク） |
-| [app-architecture.md](./app-architecture.md) | アプリ構成、ページ構成、状態管理、ディレクトリ構造、ランタイム戦略 |
-| [api-design.md](./api-design.md) | API Routes 設計、`/api/chat` の SSE ストリーミング詳細 |
-| [db-design.md](./db-design.md) | スキーマ定義、ER 図、インデックス戦略、トリガ |
-| [supabase-design.md](./supabase-design.md) | RLS ポリシー、Auth 設定、Supabase クライアント構成 |
-| [frontend-design.md](./frontend-design.md) | コンポーネント設計、ページ遷移、レスポンシブ方針、SSE受信フック |
-| [styling-design.md](./styling-design.md) | デザイントークン、カラー、タイポ、ブレークポイント、CSS Modules 規約 |
-| [infra-design.md](./infra-design.md) | Vercel 設定、環境変数、CI/CD、Supabase keep-alive |
-| [security-design.md](./security-design.md) | 認証・認可、APIキー管理、脆弱性対策 |
-| [agent-system-design.md](./agent-system-design.md) | マルチエージェントの実装設計、ローダー、tool_use、タイムアウト戦略 |
-| [prompt-design.md](./prompt-design.md) | プロンプト構成、include 機構、Prompt Caching 戦略、コンテキスト管理 |
+| ドキュメント                                       | 内容                                                                 |
+| -------------------------------------------------- | -------------------------------------------------------------------- |
+| [overview.md](./overview.md)                       | 本書（全体像 + 各ドキュメントへのリンク）                            |
+| [app-architecture.md](./app-architecture.md)       | アプリ構成、ページ構成、状態管理、ディレクトリ構造、ランタイム戦略   |
+| [api-design.md](./api-design.md)                   | API Routes 設計、`/api/chat` の SSE ストリーミング詳細               |
+| [db-design.md](./db-design.md)                     | スキーマ定義、ER 図、インデックス戦略、トリガ                        |
+| [supabase-design.md](./supabase-design.md)         | RLS ポリシー、Auth 設定、Supabase クライアント構成                   |
+| [frontend-design.md](./frontend-design.md)         | コンポーネント設計、ページ遷移、レスポンシブ方針、SSE受信フック      |
+| [styling-design.md](./styling-design.md)           | デザイントークン、カラー、タイポ、ブレークポイント、CSS Modules 規約 |
+| [infra-design.md](./infra-design.md)               | Vercel 設定、環境変数、CI/CD、Supabase keep-alive                    |
+| [security-design.md](./security-design.md)         | 認証・認可、APIキー管理、脆弱性対策                                  |
+| [agent-system-design.md](./agent-system-design.md) | マルチエージェントの実装設計、ローダー、tool_use、タイムアウト戦略   |
+| [prompt-design.md](./prompt-design.md)             | プロンプト構成、include 機構、Prompt Caching 戦略、コンテキスト管理  |
 
 ---
 
@@ -88,22 +88,22 @@
 
 ## 4. 主要設計判断のサマリ
 
-| 判断 | 採用理由 | 参照 |
-|---|---|---|
-| App Router + Route Handlers | ストリーミング応答を細かく制御、`maxDuration=60` を route.ts 単位で設定 | [app-architecture.md](./app-architecture.md) |
-| Server Actions 不採用 | ストリーミング応答に適さない | [api-design.md](./api-design.md#9-server-actions-を使わない理由) |
-| middleware + `(main)/layout.tsx` の二段ガード | middleware の Edge 制約を踏まえた多層防御 | [app-architecture.md](./app-architecture.md#4-認証ガードの二段階構成) |
-| `@supabase/ssr` の採用 | Edge / Node 両対応、`jsonwebtoken` 不要 | [supabase-design.md](./supabase-design.md#2-supabase-クライアント構成) |
-| `prompts/` を src/ 外に配置 | 非エンジニアが触れる領域、ビルド非対象 | [prompt-design.md](./prompt-design.md#2-ディレクトリ構造) |
-| エージェント定義のmtimeキャッシュ読込 | 起動時一括ではなくリクエスト毎に差分再読込、ホットリロード相当 | [agent-system-design.md](./agent-system-design.md#4-エージェント定義ローダー) |
-| マルチモデル戦略（Haiku × Sonnet） | 専門家は軽量＋並列で速度、統合のみ高性能モデル | [agent-system-design.md](./agent-system-design.md#1-アーキテクチャ概観) |
-| tool_use で並列ツール実行 | 1応答に複数 tool_use がある時 Promise.all で並列、claw-code の学び | [agent-system-design.md](./agent-system-design.md#74-ツール並列化) |
-| Prompt Caching 2層 (Anthropic + local) | API料金削減 + リロード連打の無駄削減 | [prompt-design.md](./prompt-design.md#5-prompt-caching-戦略) |
-| 直近20件の固定コンテキスト | 要約は Phase 2、シンプル優先 | [prompt-design.md](./prompt-design.md#6-コンテキスト管理直近-n-件方式) |
-| 各専門家 8秒タイムアウト + Graceful degradation | 可用性優先、部分結果で応答 | [agent-system-design.md](./agent-system-design.md#75-タイムアウトpromise-race) |
-| CSS Modules 採用（Tailwind禁止） | プロジェクトルール `.claude/rules/no-tailwind.md` | [styling-design.md](./styling-design.md) |
-| RLS + user_id 冗長保持 | 多層防御、JOIN なしで RLS 高速化 | [db-design.md](./db-design.md#3-テーブル定義) |
-| Vercel Hobby + maxDuration=60 | 規模的に十分、60秒で通常動作 | [infra-design.md](./infra-design.md#11-vercel-hobby-制約の確認) |
+| 判断                                            | 採用理由                                                                | 参照                                                                           |
+| ----------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| App Router + Route Handlers                     | ストリーミング応答を細かく制御、`maxDuration=60` を route.ts 単位で設定 | [app-architecture.md](./app-architecture.md)                                   |
+| Server Actions 不採用                           | ストリーミング応答に適さない                                            | [api-design.md](./api-design.md#9-server-actions-を使わない理由)               |
+| middleware + `(main)/layout.tsx` の二段ガード   | middleware の Edge 制約を踏まえた多層防御                               | [app-architecture.md](./app-architecture.md#4-認証ガードの二段階構成)          |
+| `@supabase/ssr` の採用                          | Edge / Node 両対応、`jsonwebtoken` 不要                                 | [supabase-design.md](./supabase-design.md#2-supabase-クライアント構成)         |
+| `prompts/` を src/ 外に配置                     | 非エンジニアが触れる領域、ビルド非対象                                  | [prompt-design.md](./prompt-design.md#2-ディレクトリ構造)                      |
+| エージェント定義のmtimeキャッシュ読込           | 起動時一括ではなくリクエスト毎に差分再読込、ホットリロード相当          | [agent-system-design.md](./agent-system-design.md#4-エージェント定義ローダー)  |
+| マルチモデル戦略（Haiku × Sonnet）              | 専門家は軽量＋並列で速度、統合のみ高性能モデル                          | [agent-system-design.md](./agent-system-design.md#1-アーキテクチャ概観)        |
+| tool_use で並列ツール実行                       | 1応答に複数 tool_use がある時 Promise.all で並列、claw-code の学び      | [agent-system-design.md](./agent-system-design.md#74-ツール並列化)             |
+| Prompt Caching 2層 (Anthropic + local)          | API料金削減 + リロード連打の無駄削減                                    | [prompt-design.md](./prompt-design.md#5-prompt-caching-戦略)                   |
+| 直近20件の固定コンテキスト                      | 要約は Phase 2、シンプル優先                                            | [prompt-design.md](./prompt-design.md#6-コンテキスト管理直近-n-件方式)         |
+| 各専門家 8秒タイムアウト + Graceful degradation | 可用性優先、部分結果で応答                                              | [agent-system-design.md](./agent-system-design.md#75-タイムアウトpromise-race) |
+| CSS Modules 採用（Tailwind禁止）                | プロジェクトルール `.claude/rules/no-tailwind.md`                       | [styling-design.md](./styling-design.md)                                       |
+| RLS + user_id 冗長保持                          | 多層防御、JOIN なしで RLS 高速化                                        | [db-design.md](./db-design.md#3-テーブル定義)                                  |
+| Vercel Hobby + maxDuration=60                   | 規模的に十分、60秒で通常動作                                            | [infra-design.md](./infra-design.md#11-vercel-hobby-制約の確認)                |
 
 ---
 
@@ -111,12 +111,12 @@
 
 `.claude/rules/` 配下に置かれた以下のルールは、実装時に必ず守ること。
 
-| ルール | 内容 |
-|---|---|
-| `no-tailwind.md` | Tailwind CSS 全面禁止。CSS Modules を使用 |
-| `bash-single-line.md` | Bash コマンドは1行ずつ。`&&` / `;` / `\|` チェイン禁止 |
+| ルール                   | 内容                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `no-tailwind.md`         | Tailwind CSS 全面禁止。CSS Modules を使用                                             |
+| `bash-single-line.md`    | Bash コマンドは1行ずつ。`&&` / `;` / `\|` チェイン禁止                                |
 | `nextjs-edge-runtime.md` | middleware.ts で `jsonwebtoken` / `bcrypt` 禁止。`jose` または `@supabase/ssr` を使用 |
-| `mandatory-testing.md` | テストなしのタスク完了不可 |
+| `mandatory-testing.md`   | テストなしのタスク完了不可                                                            |
 
 ---
 

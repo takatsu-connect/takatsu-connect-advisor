@@ -1,6 +1,7 @@
 # Supabase 設計書（Auth / RLS / クライアント）
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [DB設計](./db-design.md)
 - [セキュリティ設計](./security-design.md)
@@ -14,10 +15,10 @@
 
 ### 1.1 ログイン方式
 
-| 方式 | 用途 |
-|---|---|
-| Email + Password | 運営メンバーの主たる認証方法 |
-| Google OAuth | 利便性のため提供（招待済みアドレスのみ許可） |
+| 方式             | 用途                                         |
+| ---------------- | -------------------------------------------- |
+| Email + Password | 運営メンバーの主たる認証方法                 |
+| Google OAuth     | 利便性のため提供（招待済みアドレスのみ許可） |
 
 ### 1.2 招待制の運用方針
 
@@ -30,17 +31,17 @@
 
 ### 1.3 Supabase Dashboard 設定値
 
-| 項目 | 設定 |
-|---|---|
-| Site URL | `https://<vercel-domain>` |
-| Additional Redirect URLs | `https://<vercel-domain>/auth/callback`, `http://localhost:3000/auth/callback` |
-| Enable Email Provider | ✅ |
-| Confirm Email | ✅（招待メールで verify） |
-| Enable Google Provider | ✅ |
-| Google OAuth Client ID / Secret | Google Cloud Console で作成したもの |
-| Sign ups | **Disabled** |
-| Session timeout | デフォルト (1時間 access / 7日 refresh) |
-| JWT expiry | デフォルト (3600秒) |
+| 項目                            | 設定                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| Site URL                        | `https://<vercel-domain>`                                                      |
+| Additional Redirect URLs        | `https://<vercel-domain>/auth/callback`, `http://localhost:3000/auth/callback` |
+| Enable Email Provider           | ✅                                                                             |
+| Confirm Email                   | ✅（招待メールで verify）                                                      |
+| Enable Google Provider          | ✅                                                                             |
+| Google OAuth Client ID / Secret | Google Cloud Console で作成したもの                                            |
+| Sign ups                        | **Disabled**                                                                   |
+| Session timeout                 | デフォルト (1時間 access / 7日 refresh)                                        |
+| JWT expiry                      | デフォルト (3600秒)                                                            |
 
 ---
 
@@ -49,29 +50,31 @@
 Next.js (App Router) で Supabase を使うには用途ごとに異なるクライアントを用意する。
 `@supabase/ssr` を採用。
 
-| クライアント | 使用場所 | キー | Cookie |
-|---|---|---|---|
-| Browser Client | Client Component | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `document.cookie` |
-| Server Client (RSC/Route) | Server Component / Route Handler | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `next/headers` の cookies() |
-| Middleware Client | `middleware.ts` | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `NextRequest.cookies` / `NextResponse.cookies` |
-| Admin Client | サーバー限定（keep-alive 等） | `SUPABASE_SERVICE_ROLE_KEY` | なし |
+| クライアント              | 使用場所                         | キー                            | Cookie                                         |
+| ------------------------- | -------------------------------- | ------------------------------- | ---------------------------------------------- |
+| Browser Client            | Client Component                 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `document.cookie`                              |
+| Server Client (RSC/Route) | Server Component / Route Handler | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `next/headers` の cookies()                    |
+| Middleware Client         | `middleware.ts`                  | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `NextRequest.cookies` / `NextResponse.cookies` |
+| Admin Client              | サーバー限定（keep-alive 等）    | `SUPABASE_SERVICE_ROLE_KEY`     | なし                                           |
 
 ### 2.1 Browser Client（例）
+
 ```ts
 // src/lib/db/supabase-browser.ts
-import { createBrowserClient } from '@supabase/ssr';
+import { createBrowserClient } from "@supabase/ssr";
 export const supabaseBrowser = () =>
   createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 ```
 
 ### 2.2 Server Client（RSC / Route Handler）
+
 ```ts
 // src/lib/db/supabase-server.ts
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export const supabaseServer = () => {
   const cookieStore = cookies();
@@ -82,18 +85,19 @@ export const supabaseServer = () => {
       cookies: {
         get: (name) => cookieStore.get(name)?.value,
         set: (name, value, options) => cookieStore.set({ name, value, ...options }),
-        remove: (name, options) => cookieStore.set({ name, value: '', ...options }),
+        remove: (name, options) => cookieStore.set({ name, value: "", ...options }),
       },
-    }
+    },
   );
 };
 ```
 
 ### 2.3 Middleware Client
+
 ```ts
 // src/middleware.ts
-import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -108,42 +112,45 @@ export async function middleware(req: NextRequest) {
             res.cookies.set({ name, value, ...options });
           },
           remove: (name, options) => {
-            res.cookies.set({ name, value: '', ...options });
+            res.cookies.set({ name, value: "", ...options });
           },
         },
-      }
+      },
     );
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     return guard(req, res, user);
   } catch (err) {
-    console.error('[middleware] supabase error', err);
-    return NextResponse.redirect(new URL('/login', req.url));
+    console.error("[middleware] supabase error", err);
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 }
 
 export const config = {
-  matcher: ['/chat/:path*', '/api/chat/:path*', '/api/sessions/:path*', '/login'],
+  matcher: ["/chat/:path*", "/api/chat/:path*", "/api/sessions/:path*", "/login"],
 };
 ```
 
 **Edge Runtime 制約** (`.claude/rules/nextjs-edge-runtime.md`):
+
 - `@supabase/ssr` は Web Crypto API ベースで Edge 互換
 - `jsonwebtoken` / `bcrypt` を middleware で使わない
 - catch節では必ず `console.error` を出す
 
 ### 2.4 Admin Client（server-only）
+
 ```ts
 // src/lib/db/supabase-admin.ts
-import 'server-only';
-import { createClient } from '@supabase/supabase-js';
+import "server-only";
+import { createClient } from "@supabase/supabase-js";
 
 export const supabaseAdmin = () =>
-  createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  );
+  createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
 ```
+
 - **絶対にクライアントバンドルに混入させない**（`'server-only'` import 必須）
 - keepalive スクリプトなど、RLS をバイパスしたい極小ケースで使用
 
@@ -248,10 +255,12 @@ API Route (`/api/chat` 等) から chat_messages / specialist_traces に書き�
 ## 5. セッション更新のタイミング
 
 ### 5.1 Cookie 更新
+
 `@supabase/ssr` は `getUser()` 呼び出し時に refresh token で自動更新し、新しい cookie を `set` してくれる。
 middleware 内で `getUser()` を呼ぶことで、全リクエストで自動的に cookie が延長される。
 
 ### 5.2 長時間ストリーム中のトークン失効
+
 - `/api/chat` のストリーム中にセッションが失効する可能性は低い（maxDuration=60秒）
 - 冒頭で `getUser()` を呼び、以降はストリーム内で再検証しない
 - Orchestrator 完了後の `insert` 時に失効していれば RLS で弾かれる（エッジケース）
@@ -274,20 +283,21 @@ middleware 内で `getUser()` を呼ぶことで、全リクエストで自動�
 ```
 
 `/auth/callback/route.ts` の例:
+
 ```ts
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
-  const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') ?? '/chat';
-  if (!code) return NextResponse.redirect(new URL('/login?error=missing_code', url));
+  const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next") ?? "/chat";
+  if (!code) return NextResponse.redirect(new URL("/login?error=missing_code", url));
 
   const supabase = supabaseServer();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    console.error('[auth/callback] exchange failed', error);
-    return NextResponse.redirect(new URL('/login?error=exchange_failed', url));
+    console.error("[auth/callback] exchange failed", error);
+    return NextResponse.redirect(new URL("/login?error=exchange_failed", url));
   }
   return NextResponse.redirect(new URL(next, url));
 }
@@ -300,6 +310,7 @@ export async function GET(req: NextRequest) {
 詳細は [infra-design.md](./infra-design.md) の CI/CD セクション参照。
 
 GitHub Actions から:
+
 ```bash
 curl -X POST "$SUPABASE_URL/rest/v1/keepalive_log" \
   -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \

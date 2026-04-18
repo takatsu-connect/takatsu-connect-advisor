@@ -3,6 +3,7 @@
 **この文書は2026年4月時点の知見に基づく。**
 **Playwright, Puppeteer, Chrome Extensions API は進化が速いため、実装時には各ツールの最新ドキュメントを必ず確認すること。**
 **特に以下の点は将来解消される可能性がある:**
+
 - **tabCapture APIのユーザージェスチャー要件** — Chrome APIの仕様変更で緩和される可能性
 - **Playwrightの拡張機能サポート** — 新バージョンでアイコンクリック対応が追加される可能性
 - **headlessモードでの拡張機能動作** — Chrome/Playwrightの進化で対応される可能性
@@ -48,11 +49,11 @@ Chrome拡張の `activeTab` 権限はユーザーがアイコンをクリック�
 
 本番用との差分：
 
-| 項目 | 本番 | テスト |
-|---|---|---|
-| `activeTab` | あり | **なし** |
-| `tabs` | なし or あり | **あり**（URLフィルタ検索に必要） |
-| `host_permissions` | 特定URL | **`<all_urls>`** |
+| 項目               | 本番         | テスト                            |
+| ------------------ | ------------ | --------------------------------- |
+| `activeTab`        | あり         | **なし**                          |
+| `tabs`             | なし or あり | **あり**（URLフィルタ検索に必要） |
+| `host_permissions` | 特定URL      | **`<all_urls>`**                  |
 
 ビルド後に `dist/manifest.json` をテスト用に差し替える：
 
@@ -83,7 +84,8 @@ fs.copyFileSync("manifest.test.json", "dist/manifest.json");
 tabCaptureが失敗した場合にもフローが止まらず部分成功として保存されるよう、`handleStartAnalysis` で `.catch()` を実装しておくことが重要：
 
 ```typescript
-const captureResult = await captureController.startCapture(tab.id, session)
+const captureResult = await captureController
+  .startCapture(tab.id, session)
   .then(() => ({ success: true }))
   .catch((err) => {
     logger.error("Tab capture failed", { error: err.message });
@@ -124,11 +126,8 @@ async function main() {
 
   // 拡張機能を読み込んで起動
   const context = await chromium.launchPersistentContext(userDataDir, {
-    headless: false,  // 拡張機能はheadlessでは動作しない
-    args: [
-      `--disable-extensions-except=${extensionPath}`,
-      `--load-extension=${extensionPath}`,
-    ],
+    headless: false, // 拡張機能はheadlessでは動作しない
+    args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`],
   });
 
   // Service Worker取得 → 拡張機能ID取得
@@ -170,14 +169,14 @@ async function main() {
 
 ### A.5 Playwright の利点（Puppeteerとの比較）
 
-| 機能 | Playwright | Puppeteer |
-|---|---|---|
-| Service Worker取得 | `context.serviceWorkers()` で即取得 | `browser.waitForTarget()` で検出困難 |
-| Service Worker evaluate | `serviceWorker.evaluate()` | ターゲット接続が複雑 |
-| 拡張機能の読み込み | `launchPersistentContext` | `--load-extension` + `connect()` |
-| 公式拡張テストガイド | あり | なし |
-| アイコンクリック | 不可 | 不可 |
-| activeTab付与 | 不可（テスト用manifestで回避） | 不可（同左） |
+| 機能                    | Playwright                          | Puppeteer                            |
+| ----------------------- | ----------------------------------- | ------------------------------------ |
+| Service Worker取得      | `context.serviceWorkers()` で即取得 | `browser.waitForTarget()` で検出困難 |
+| Service Worker evaluate | `serviceWorker.evaluate()`          | ターゲット接続が複雑                 |
+| 拡張機能の読み込み      | `launchPersistentContext`           | `--load-extension` + `connect()`     |
+| 公式拡張テストガイド    | あり                                | なし                                 |
+| アイコンクリック        | 不可                                | 不可                                 |
+| activeTab付与           | 不可（テスト用manifestで回避）      | 不可（同左）                         |
 
 ### A.6 Popup内の `chrome.tabs.query` のフォールバック
 
@@ -203,7 +202,7 @@ Service Worker側にも同様のフォールバックが必要：
 let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 if (!tab?.url || !isTargetUrl(tab.url)) {
   const targetTabs = await chrome.tabs.query({ url: "https://www.example.com/*" });
-  const found = targetTabs.find(t => t.url && isTargetUrl(t.url));
+  const found = targetTabs.find((t) => t.url && isTargetUrl(t.url));
   if (found) tab = found;
 }
 ```
@@ -272,7 +271,7 @@ await reloadPage.waitForTimeout(3000);
 await reloadPage.close();
 
 // Service Worker を再取得（リロード後は新しいインスタンスになる）
-sw = context.serviceWorkers().find(w => w.url().includes(extId));
+sw = context.serviceWorkers().find((w) => w.url().includes(extId));
 if (!sw) sw = await context.waitForEvent("serviceworker", { timeout: 10000 });
 ```
 
@@ -314,12 +313,12 @@ npm install --save-dev puppeteer-core ws
 
 ### 各オプションの説明
 
-| オプション | 説明 |
-|---|---|
-| `--remote-debugging-port=9222` | CDP（Chrome DevTools Protocol）のポート。Puppeteerがここに接続する |
-| `--remote-debugging-address=127.0.0.1` | デバッグポートのバインドアドレス。省略するとポートが開かない場合がある（Chrome 146+で確認） |
-| `--user-data-dir="..."` | Chromeプロファイルのディレクトリ。通常のプロファイルと分離するため専用ディレクトリを指定する。Instagramなどにログインが必要な場合は、通常のプロファイルを指定することも可能 |
-| `--load-extension="..."` | テスト対象の拡張機能のディレクトリ（`manifest.json`が存在するディレクトリ）を指定。デベロッパーモードで自動読み込みされる |
+| オプション                             | 説明                                                                                                                                                                        |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--remote-debugging-port=9222`         | CDP（Chrome DevTools Protocol）のポート。Puppeteerがここに接続する                                                                                                          |
+| `--remote-debugging-address=127.0.0.1` | デバッグポートのバインドアドレス。省略するとポートが開かない場合がある（Chrome 146+で確認）                                                                                 |
+| `--user-data-dir="..."`                | Chromeプロファイルのディレクトリ。通常のプロファイルと分離するため専用ディレクトリを指定する。Instagramなどにログインが必要な場合は、通常のプロファイルを指定することも可能 |
+| `--load-extension="..."`               | テスト対象の拡張機能のディレクトリ（`manifest.json`が存在するディレクトリ）を指定。デベロッパーモードで自動読み込みされる                                                   |
 
 ### 重要な注意点
 
@@ -349,33 +348,38 @@ curl -s http://127.0.0.1:9222/json/version
 
 ### Playwright + テスト用manifest（推奨）
 
-| テスト対象 | 自動テスト | 備考 |
-|---|---|---|
-| Popup UI表示 | OK | `chrome-extension://ID/popup.html` に直接アクセス |
-| 画面遷移 | OK | ボタンクリックで遷移、テキスト内容を検証 |
-| 設定フォーム | OK | 入力値のデフォルト値、変更を検証 |
-| chrome.storage 読み書き | OK | Popupコンテキストまたは`serviceWorker.evaluate()`からアクセス |
-| Content Script | OK | `chrome.tabs.sendMessage` で通信。ページ読み込み後に注入される |
-| Service Worker ロジック | OK | `context.serviceWorkers()` で即取得、`evaluate()` で直接実行 |
-| tabCapture（音声/映像取得） | **NG** | `<all_urls>` ホスト権限でも動作しない。アイコンクリック/ショートカットのユーザージェスチャーが必須 |
-| ブラウザUIの操作 | **NG** | ツールバーアイコンのクリック、ショートカットキー等はプログラムから不可 |
+| テスト対象                  | 自動テスト | 備考                                                                                               |
+| --------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| Popup UI表示                | OK         | `chrome-extension://ID/popup.html` に直接アクセス                                                  |
+| 画面遷移                    | OK         | ボタンクリックで遷移、テキスト内容を検証                                                           |
+| 設定フォーム                | OK         | 入力値のデフォルト値、変更を検証                                                                   |
+| chrome.storage 読み書き     | OK         | Popupコンテキストまたは`serviceWorker.evaluate()`からアクセス                                      |
+| Content Script              | OK         | `chrome.tabs.sendMessage` で通信。ページ読み込み後に注入される                                     |
+| Service Worker ロジック     | OK         | `context.serviceWorkers()` で即取得、`evaluate()` で直接実行                                       |
+| tabCapture（音声/映像取得） | **NG**     | `<all_urls>` ホスト権限でも動作しない。アイコンクリック/ショートカットのユーザージェスチャーが必須 |
+| ブラウザUIの操作            | **NG**     | ツールバーアイコンのクリック、ショートカットキー等はプログラムから不可                             |
 
 ---
 
 ## トラブルシューティング
 
 ### ポートに接続できない
+
 - Chromeのプロセスが完全に終了しているか確認（タスクマネージャー）
 - `--remote-debugging-address=127.0.0.1` を追加して起動し直す
 
 ### Service Workerが見つからない
+
 Manifest V3のService Workerはアイドル時に停止するため検出できないことがある。Popup操作でメッセージを送るとService Workerが起動する。
 
 ### tabCapture が動作しない
+
 `tabCapture` API はホスト権限では許可されない。ユーザージェスチャーが必須。自動テストではtabCapture失敗時の部分成功フローをテストする。
 
 ### `chrome.runtime.sendMessage` がService Workerで横取りされる
+
 Service Worker のリスナーの先頭で、Offscreen Document宛のメッセージを除外する：
+
 ```typescript
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const offscreenMessages = ["RUN_TRANSCRIPTION", "RUN_OCR", "START_CAPTURE", "STOP_CAPTURE"];
@@ -386,4 +390,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 ```
 
 ### 拡張機能のリロード後もService Workerが古いコードで動く
+
 テスト開始時に `chrome://extensions/` のリロードボタンをプログラムでクリックするか、テストごとに新しい `userDataDir` を使う。

@@ -1,6 +1,7 @@
 # プロンプト設計書
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [エージェントシステム設計](./agent-system-design.md)
 - [API設計](./api-design.md)
@@ -41,6 +42,7 @@ prompts/
 ```
 
 ### 2.1 `prompts/` を `src/` 外に置く理由
+
 Next.js スペシャリスト推奨: 非エンジニアが触れる領域として分離、TypeScript ビルド対象外にする。
 
 ---
@@ -82,10 +84,10 @@ maxTokens: 1024
 
 ```ts
 function expandIncludes(body: string, includes: string[]): string {
-  const rootDir = path.join(process.cwd(), 'prompts');
-  const included = includes.map(rel => {
+  const rootDir = path.join(process.cwd(), "prompts");
+  const included = includes.map((rel) => {
     const full = path.join(rootDir, rel);
-    const raw = fs.readFileSync(full, 'utf8');
+    const raw = fs.readFileSync(full, "utf8");
     const parsed = matter(raw).content.trim();
     return `<!-- ${rel} -->\n${parsed}`;
   });
@@ -93,9 +95,9 @@ function expandIncludes(body: string, includes: string[]): string {
   let result = body;
   result = result.replace(/\{\{include:([^}]+)\}\}/g, (_, p) => {
     const full = path.join(rootDir, p);
-    return fs.readFileSync(full, 'utf8');
+    return fs.readFileSync(full, "utf8");
   });
-  return [...included, '---', result].join('\n\n');
+  return [...included, "---", result].join("\n\n");
 }
 ```
 
@@ -113,7 +115,7 @@ function expandIncludes(body: string, includes: string[]): string {
 
 目的: 質問を読み、呼ぶべき専門家を JSON で返す。
 
-```markdown
+````markdown
 ---
 name: classifier
 displayName: 分類器
@@ -139,12 +141,15 @@ maxTokens: 256
   "reasoning": "選定理由を80文字以内で"
 }
 ```
+````
 
 判断の原則:
+
 - 最小限の専門家で十分なら1名だけ選ぶこと
 - 質問が一般的・雑談的なら空配列でよい
 - 存在しない専門家名は出力しないこと
-```
+
+````
 
 ### 4.2 `shared/classifier-agents-list.md`
 
@@ -160,7 +165,7 @@ maxTokens: 256
 | data-analyst | データアナリスト | GA/GSC数値の解釈 |
 | content-strategist | コンテンツ戦略家 | 記事企画・編集方針 |
 | local-expert | 地域情報専門家 | 高津区の地域文脈 |
-```
+````
 
 CI で自動再生成し、`.md` と `prompts/agents/*.md` が乖離したら PR で更新する運用。
 
@@ -189,6 +194,7 @@ maxTokens: 2048
 複数の専門家から得られた中間所見（<specialist_results>タグ内）を踏まえ、運営メンバーに向けて実用的で一貫性のある回答を作成してください。
 
 行動原則:
+
 - 専門家の見解が矛盾する場合、根拠を比較し、より妥当な結論を選ぶ
 - 数値・日付・固有名詞は専門家の結果から正確に引用する
 - 箇条書きと見出しを使って、読みやすく構造化する
@@ -222,6 +228,7 @@ maxTokens: 1024
 あなたは地域メディアのSEO専門家です。高津コネクト（WordPress）を対象に、検索流入を増やす観点で助言します。
 
 行動原則:
+
 - 数値を確認できる場合は必ず `query_search_console` を使い、推測だけで結論を出さない
 - 個別ページの状態確認が必要なら `fetch_webpage` でタイトル・descriptionを確認する
 - 過去記事の構成を分析する際は `fetch_wp_posts` を使う
@@ -233,12 +240,12 @@ maxTokens: 1024
 
 同様の形式で作成。各 `tools` に以下を割り当てる:
 
-| エージェント | 推奨 tools |
-|---|---|
+| エージェント         | 推奨 tools                                       |
+| -------------------- | ------------------------------------------------ |
 | marketing-specialist | `query_google_analytics`, `query_search_console` |
-| data-analyst | `query_google_analytics`, `query_search_console` |
-| content-strategist | `fetch_wp_posts`, `query_google_analytics` |
-| local-expert | `fetch_wp_posts` |
+| data-analyst         | `query_google_analytics`, `query_search_console` |
+| content-strategist   | `fetch_wp_posts`, `query_google_analytics`       |
+| local-expert         | `fetch_wp_posts`                                 |
 
 ---
 
@@ -250,6 +257,7 @@ Anthropic の [Prompt Caching](https://docs.anthropic.com/en/docs/build-with-cla
 ### 5.1 キャッシュポイント設計
 
 Claude API リクエストの構造:
+
 ```json
 {
   "model": "claude-sonnet-4-6",
@@ -285,6 +293,7 @@ Claude API リクエストの構造:
 ### 5.3 メトリクス確認
 
 `response.usage` から以下を取得し、`/api/chat` の `usage` イベントで返す:
+
 - `cache_creation_input_tokens`
 - `cache_read_input_tokens`
 - `input_tokens`
@@ -293,6 +302,7 @@ Claude API リクエストの構造:
 フロント側では初期は非表示だが、デバッグ時に開発者ツールで確認できる。
 
 ### 5.4 キャッシュ無効化の注意
+
 - システムプロンプトが変わる = `prompts/shared/*` または `prompts/agents/*` を変更 = キャッシュ再作成
 - 頻繁に更新するコンテンツは include から外して「ツール経由で取得」に置き換える
 - 例: 「最近のPV」や「最新記事タイトル」はプロンプトに含めず `query_google_analytics` / `fetch_wp_posts` で動的取得
@@ -302,20 +312,24 @@ Claude API リクエストの構造:
 ## 6. コンテキスト管理（直近 N 件方式）
 
 ### 6.1 実装
+
 - `CONTEXT_MESSAGE_LIMIT` = 20（既定値、環境変数で変更可）
 - DB から `ORDER BY created_at DESC LIMIT N` で取得し、昇順に reverse して Claude に渡す
 - N を超えた過去は送らない（要件 3.5.1）
 
 ### 6.2 件数に role を含めるか
+
 - `user` と `assistant` の両方を1件ずつカウント
 - `system` 相当はプロンプトに含めるため messages に入れない
 - **assistant のトレース情報（specialist_traces）は Claude の messages に含めない**（肥大化防止）
 
 ### 6.3 Phase 2 での要約検討
+
 - N 件を超えた過去を「要約メッセージ1件」にして system に混ぜる案
 - Phase 1 では未実装
 
 ### 6.4 コンテキストプログレスバーの計算式
+
 - 現在のメッセージ数 = assistant も含めた DB 件数
 - バーの長さ = `min(count, N) / N`
 - N に達したら過去のものから順に落ちていく
@@ -325,12 +339,14 @@ Claude API リクエストの構造:
 ## 7. プロンプト最小化ガイドライン（claw-code 学び）
 
 ### 7.1 やること
+
 - システムプロンプトは 500〜800 字を目標（include 含まない本文側）
 - ツール定義は必要な専門家にのみ配布（全部に全ツールを渡さない）
 - ユーザー履歴は直近 20 件上限
 - 個人名・連絡先等の冗長情報は載せない
 
 ### 7.2 やらないこと
+
 - 「あなたは〜です。以下のタスクを遂行してください。必ず丁寧に...」等の冗長な前置き
 - 英語と日本語を両方書く（日本語のみ）
 - 例示（few-shot）は **1〜2個だけ**、必要時のみ
