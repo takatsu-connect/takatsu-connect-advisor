@@ -1,6 +1,7 @@
 # API 設計書
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [アプリ構成](./app-architecture.md)
 - [エージェントシステム設計](./agent-system-design.md)
@@ -14,14 +15,14 @@
 
 すべて Next.js の Route Handlers (`route.ts`) で実装。Server Actions は使わない。
 
-| メソッド | パス | 用途 | 認証 | ストリーミング |
-|---|---|---|---|---|
-| `POST` | `/api/chat` | チャット送信 + 3段階パイプライン | 必須 | **SSE** |
-| `GET` | `/api/sessions` | セッション一覧 | 必須 | なし |
-| `POST` | `/api/sessions` | セッション新規作成 | 必須 | なし |
-| `GET` | `/api/sessions/:id/messages` | セッション内メッセージ取得 | 必須 | なし |
-| `GET` | `/api/auth/callback` | OAuth コールバック | なし | なし |
-| `POST` | `/api/auth/signout` | ログアウト | 必須 | なし |
+| メソッド | パス                         | 用途                             | 認証 | ストリーミング |
+| -------- | ---------------------------- | -------------------------------- | ---- | -------------- |
+| `POST`   | `/api/chat`                  | チャット送信 + 3段階パイプライン | 必須 | **SSE**        |
+| `GET`    | `/api/sessions`              | セッション一覧                   | 必須 | なし           |
+| `POST`   | `/api/sessions`              | セッション新規作成               | 必須 | なし           |
+| `GET`    | `/api/sessions/:id/messages` | セッション内メッセージ取得       | 必須 | なし           |
+| `GET`    | `/api/auth/callback`         | OAuth コールバック               | なし | なし           |
+| `POST`   | `/api/auth/signout`          | ログアウト                       | 必須 | なし           |
 
 すべて Node.js Runtime で動作（`export const runtime = 'nodejs'` を明記）。
 
@@ -30,30 +31,36 @@
 ## 2. 共通仕様
 
 ### 2.1 認証
+
 - 全エンドポイント（`/api/auth/callback` 以外）は `@supabase/ssr` で Supabase セッションを取得し、無効なら `401` を返す
 - 認証失敗時のレスポンス: `{ error: 'unauthorized' }` + 401
 
 ### 2.2 Content-Type
+
 - 通常 API: `application/json`
 - SSE: `text/event-stream`
 
 ### 2.3 CORS
+
 - 同一オリジンのみ。CORS ヘッダは設定しない（Vercel の同一オリジン配信）
 
 ### 2.4 レート制限
+
 - Phase 1 では実装しない（招待制・数名規模のため）
 - 将来的に Vercel KV もしくは Supabase カウンタで実装する余地を残す
 
 ### 2.5 エラーレスポンス形式（ストリーム以外）
+
 ```json
 {
-  "error": "string",           // 短い識別子 (unauthorized / validation / internal 等)
-  "message": "string",         // 人間向けメッセージ
-  "details": { }               // 任意
+  "error": "string", // 短い識別子 (unauthorized / validation / internal 等)
+  "message": "string", // 人間向けメッセージ
+  "details": {} // 任意
 }
 ```
 
 ### 2.6 リクエストバリデーション
+
 - すべての POST リクエストは **zod** でスキーマ検証する
 - 失敗時 `400 validation`
 
@@ -62,15 +69,16 @@
 ## 3. POST /api/chat（チャット送信・SSE）
 
 ### 3.1 概要
+
 ユーザーのメッセージを受け取り、3段階パイプライン（分類 → 並列専門家 → 統合）の結果を SSE でストリーミングする。
 
 ### 3.2 ランタイム設定
 
 ```ts
 // app/api/chat/route.ts
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 export const maxDuration = 60;
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 ```
 
 ### 3.3 リクエスト
@@ -88,6 +96,7 @@ Cookie: sb-access-token=...; sb-refresh-token=...
 ```
 
 zod スキーマ:
+
 ```ts
 const ChatRequest = z.object({
   sessionId: z.string().uuid().nullable(),
@@ -106,19 +115,20 @@ const ChatRequest = z.object({
 
 ### 3.5 SSE イベント種別
 
-| event | data スキーマ | 発生タイミング |
-|---|---|---|
-| `session` | `{ sessionId: string, messageId: string }` | セッション確定＋ユーザーメッセージ保存直後 |
-| `status` | `{ phase: 'classify'\|'specialist'\|'orchestrate', text: string }` | 各フェーズ開始時 |
-| `classification` | `{ specialists: string[], reasoning: string }` | 分類完了時 |
-| `specialist_start` | `{ agent: string, displayName: string }` | 各専門家呼び出し開始時 |
-| `specialist_result` | `{ agent: string, status: 'ok'\|'timeout'\|'error', summary: string, toolCalls: ToolCallLog[] }` | 各専門家完了時（並列） |
-| `content` | `{ delta: string }` | Orchestrator のテキストチャンク |
-| `usage` | `{ cacheReadTokens: number, cacheCreationTokens: number, inputTokens: number, outputTokens: number, contextCount: number }` | 統合完了直前 |
-| `done` | `{ assistantMessageId: string }` | 完了通知 |
-| `error` | `{ code: string, message: string, partial: boolean }` | エラー時 |
+| event               | data スキーマ                                                                                                               | 発生タイミング                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `session`           | `{ sessionId: string, messageId: string }`                                                                                  | セッション確定＋ユーザーメッセージ保存直後 |
+| `status`            | `{ phase: 'classify'\|'specialist'\|'orchestrate', text: string }`                                                          | 各フェーズ開始時                           |
+| `classification`    | `{ specialists: string[], reasoning: string }`                                                                              | 分類完了時                                 |
+| `specialist_start`  | `{ agent: string, displayName: string }`                                                                                    | 各専門家呼び出し開始時                     |
+| `specialist_result` | `{ agent: string, status: 'ok'\|'timeout'\|'error', summary: string, toolCalls: ToolCallLog[] }`                            | 各専門家完了時（並列）                     |
+| `content`           | `{ delta: string }`                                                                                                         | Orchestrator のテキストチャンク            |
+| `usage`             | `{ cacheReadTokens: number, cacheCreationTokens: number, inputTokens: number, outputTokens: number, contextCount: number }` | 統合完了直前                               |
+| `done`              | `{ assistantMessageId: string }`                                                                                            | 完了通知                                   |
+| `error`             | `{ code: string, message: string, partial: boolean }`                                                                       | エラー時                                   |
 
 サンプルストリーム:
+
 ```
 event: session
 data: {"sessionId":"9f...","messageId":"a1..."}
@@ -248,12 +258,12 @@ export async function POST(req: NextRequest) {
 
 ### 3.7 タイムアウト戦略
 
-| フェーズ | タイムアウト | 失敗時挙動 |
-|---|---|---|
-| Classifier | 5秒 | 既定の専門家セット（orchestrator のみ）で続行 |
-| 各 Specialist | `SPECIALIST_TIMEOUT_MS`=8秒 (`Promise.race`) | その専門家を除外して統合へ |
-| Orchestrator | 残り時間 - 2秒バッファ | 既受信分を保存し `error` イベント |
-| 全体 | `maxDuration=60秒` | Vercel 側で強制終了（クライアントは切断検知） |
+| フェーズ      | タイムアウト                                 | 失敗時挙動                                    |
+| ------------- | -------------------------------------------- | --------------------------------------------- |
+| Classifier    | 5秒                                          | 既定の専門家セット（orchestrator のみ）で続行 |
+| 各 Specialist | `SPECIALIST_TIMEOUT_MS`=8秒 (`Promise.race`) | その専門家を除外して統合へ                    |
+| Orchestrator  | 残り時間 - 2秒バッファ                       | 既受信分を保存し `error` イベント             |
+| 全体          | `maxDuration=60秒`                           | Vercel 側で強制終了（クライアントは切断検知） |
 
 ### 3.8 ローカル完全一致キャッシュ
 
@@ -266,10 +276,13 @@ export async function POST(req: NextRequest) {
 ### 3.9 クライアント側の受信（参考）
 
 ```ts
-const res = await fetch('/api/chat', { method: 'POST', body: JSON.stringify({ sessionId, message }) });
+const res = await fetch("/api/chat", {
+  method: "POST",
+  body: JSON.stringify({ sessionId, message }),
+});
 const reader = res.body!.getReader();
 const decoder = new TextDecoder();
-let buf = '';
+let buf = "";
 while (true) {
   const { value, done } = await reader.read();
   if (done) break;
@@ -287,11 +300,13 @@ while (true) {
 ## 4. GET /api/sessions
 
 ### 4.1 リクエスト
+
 ```http
 GET /api/sessions?limit=30&cursor=<ISO8601>
 ```
 
 ### 4.2 レスポンス
+
 ```json
 {
   "sessions": [
@@ -307,6 +322,7 @@ GET /api/sessions?limit=30&cursor=<ISO8601>
 ```
 
 ### 4.3 挙動
+
 - 自ユーザー分のみ（RLS 任せ + `eq('user_id', user.id)` ダブルチェック）
 - `ORDER BY last_message_at DESC`
 
@@ -315,13 +331,15 @@ GET /api/sessions?limit=30&cursor=<ISO8601>
 ## 5. POST /api/sessions
 
 ### 5.1 リクエスト
+
 ```json
 {
-  "title": "string | null"   // null の場合は初回メッセージから自動生成
+  "title": "string | null" // null の場合は初回メッセージから自動生成
 }
 ```
 
 ### 5.2 レスポンス
+
 ```json
 { "id": "uuid", "title": "string", "createdAt": "..." }
 ```
@@ -333,11 +351,13 @@ Phase 1 ではこのエンドポイントは `/api/chat` 内の自動作成と�
 ## 6. GET /api/sessions/:id/messages
 
 ### 6.1 リクエスト
+
 ```http
 GET /api/sessions/:id/messages?limit=100
 ```
 
 ### 6.2 レスポンス
+
 ```json
 {
   "messages": [
@@ -361,6 +381,7 @@ GET /api/sessions/:id/messages?limit=100
 ## 7. POST /api/auth/signout
 
 ### 7.1 処理
+
 - `supabase.auth.signOut()` を呼び、Cookie を破棄
 - `{ ok: true }` を返す
 - クライアントは受信後 `/login` に遷移
@@ -370,6 +391,7 @@ GET /api/sessions/:id/messages?limit=100
 ## 8. GET /api/auth/callback
 
 ### 8.1 処理
+
 - Google OAuth のコールバック URL
 - クエリの `code` を `supabase.auth.exchangeCodeForSession(code)` でセッションに変換
 - `/chat` にリダイレクト
@@ -378,11 +400,11 @@ GET /api/sessions/:id/messages?limit=100
 
 ## 9. Server Actions を使わない理由
 
-| 事項 | Server Actions | API Routes (採用) |
-|---|---|---|
-| ストリーミング応答 | 不可（レスポンス完結後に返る） | `ReadableStream` で SSE 可能 |
-| `maxDuration` 制御 | ページ単位の制約 | route.ts 単位で個別設定 |
-| クライアント側の制御 | useFormStatus / useOptimistic | fetch + AbortController で細粒度 |
+| 事項                 | Server Actions                 | API Routes (採用)                |
+| -------------------- | ------------------------------ | -------------------------------- |
+| ストリーミング応答   | 不可（レスポンス完結後に返る） | `ReadableStream` で SSE 可能     |
+| `maxDuration` 制御   | ページ単位の制約               | route.ts 単位で個別設定          |
+| クライアント側の制御 | useFormStatus / useOptimistic  | fetch + AbortController で細粒度 |
 
 チャット主要経路は SSE が必須なため API Routes を選択する。
 

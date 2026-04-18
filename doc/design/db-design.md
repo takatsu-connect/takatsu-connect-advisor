@@ -1,6 +1,7 @@
 # DB 設計書
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [Supabase設計](./supabase-design.md)
 - [API設計](./api-design.md)
@@ -84,14 +85,14 @@
 
 ユーザーごとのチャットセッション（会話スレッド）。
 
-| カラム | 型 | 制約 | 説明 |
-|---|---|---|---|
-| `id` | `uuid` | PK, default `gen_random_uuid()` | セッションID |
-| `user_id` | `uuid` | NOT NULL, FK → `auth.users(id)` ON DELETE CASCADE | 所有ユーザー |
-| `title` | `text` | NOT NULL, default `'新しい会話'` | 表示用タイトル |
-| `created_at` | `timestamptz` | NOT NULL, default `now()` | 作成日時 |
-| `last_message_at` | `timestamptz` | NOT NULL, default `now()` | 最終メッセージ日時（一覧ソート用） |
-| `message_count` | `int` | NOT NULL, default `0` | メッセージ件数（トリガで更新） |
+| カラム            | 型            | 制約                                              | 説明                               |
+| ----------------- | ------------- | ------------------------------------------------- | ---------------------------------- |
+| `id`              | `uuid`        | PK, default `gen_random_uuid()`                   | セッションID                       |
+| `user_id`         | `uuid`        | NOT NULL, FK → `auth.users(id)` ON DELETE CASCADE | 所有ユーザー                       |
+| `title`           | `text`        | NOT NULL, default `'新しい会話'`                  | 表示用タイトル                     |
+| `created_at`      | `timestamptz` | NOT NULL, default `now()`                         | 作成日時                           |
+| `last_message_at` | `timestamptz` | NOT NULL, default `now()`                         | 最終メッセージ日時（一覧ソート用） |
+| `message_count`   | `int`         | NOT NULL, default `0`                             | メッセージ件数（トリガで更新）     |
 
 ```sql
 create table public.chat_sessions (
@@ -105,6 +106,7 @@ create table public.chat_sessions (
 ```
 
 **インデックス**:
+
 ```sql
 create index idx_chat_sessions_user_last on public.chat_sessions (user_id, last_message_at desc);
 ```
@@ -115,15 +117,15 @@ create index idx_chat_sessions_user_last on public.chat_sessions (user_id, last_
 
 ユーザーとアシスタントのメッセージ。削除不可（要件 3.2）。
 
-| カラム | 型 | 制約 | 説明 |
-|---|---|---|---|
-| `id` | `uuid` | PK | メッセージID |
-| `session_id` | `uuid` | NOT NULL, FK → `chat_sessions(id)` ON DELETE CASCADE | 所属セッション |
-| `user_id` | `uuid` | NOT NULL, FK → `auth.users(id)` ON DELETE CASCADE | 所有ユーザー（冗長） |
-| `role` | `text` | NOT NULL, CHECK (`role in ('user','assistant','system')`) | 役割 |
-| `content` | `text` | NOT NULL | 本文 |
-| `created_at` | `timestamptz` | NOT NULL, default `now()` | 作成日時 |
-| `client_nonce` | `text` | NULL | リクエスト冪等キー（ユーザー送信分のみ） |
+| カラム         | 型            | 制約                                                      | 説明                                     |
+| -------------- | ------------- | --------------------------------------------------------- | ---------------------------------------- |
+| `id`           | `uuid`        | PK                                                        | メッセージID                             |
+| `session_id`   | `uuid`        | NOT NULL, FK → `chat_sessions(id)` ON DELETE CASCADE      | 所属セッション                           |
+| `user_id`      | `uuid`        | NOT NULL, FK → `auth.users(id)` ON DELETE CASCADE         | 所有ユーザー（冗長）                     |
+| `role`         | `text`        | NOT NULL, CHECK (`role in ('user','assistant','system')`) | 役割                                     |
+| `content`      | `text`        | NOT NULL                                                  | 本文                                     |
+| `created_at`   | `timestamptz` | NOT NULL, default `now()`                                 | 作成日時                                 |
+| `client_nonce` | `text`        | NULL                                                      | リクエスト冪等キー（ユーザー送信分のみ） |
 
 ```sql
 create table public.chat_messages (
@@ -138,6 +140,7 @@ create table public.chat_messages (
 ```
 
 **インデックス**:
+
 ```sql
 -- セッション内の時系列取得（最頻出クエリ）
 create index idx_chat_messages_session_created
@@ -153,6 +156,7 @@ create unique index uq_chat_messages_user_nonce
 ```
 
 **クエリパターン**:
+
 ```sql
 -- 直近 N 件取得（送信時）
 select id, role, content, created_at
@@ -176,19 +180,19 @@ limit 200;
 
 assistant メッセージに紐づく専門家の実行トレース。デバッグ・監査・Phase 2 の可視化で使用。
 
-| カラム | 型 | 制約 | 説明 |
-|---|---|---|---|
-| `id` | `uuid` | PK | トレースID |
-| `message_id` | `uuid` | NOT NULL, FK → `chat_messages(id)` ON DELETE CASCADE | 紐づく assistant メッセージ |
-| `session_id` | `uuid` | NOT NULL, FK → `chat_sessions(id)` ON DELETE CASCADE | 冗長（RLS用） |
-| `user_id` | `uuid` | NOT NULL, FK → `auth.users(id)` ON DELETE CASCADE | 冗長（RLS用） |
-| `agent_name` | `text` | NOT NULL | エージェント識別子 (`seo-specialist` 等) |
-| `status` | `text` | NOT NULL, CHECK (`status in ('ok','timeout','error','skipped')`) | ステータス |
-| `summary` | `text` | NULL | 専門家の中間回答要約 |
-| `tool_calls` | `jsonb` | NOT NULL, default `'[]'::jsonb` | `[{tool, input, output, ms, ok}]` |
-| `latency_ms` | `int` | NULL | 実行時間 |
-| `usage` | `jsonb` | NULL | `{input_tokens, output_tokens, cache_read, cache_creation}` |
-| `created_at` | `timestamptz` | NOT NULL, default `now()` | 作成日時 |
+| カラム       | 型            | 制約                                                             | 説明                                                        |
+| ------------ | ------------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| `id`         | `uuid`        | PK                                                               | トレースID                                                  |
+| `message_id` | `uuid`        | NOT NULL, FK → `chat_messages(id)` ON DELETE CASCADE             | 紐づく assistant メッセージ                                 |
+| `session_id` | `uuid`        | NOT NULL, FK → `chat_sessions(id)` ON DELETE CASCADE             | 冗長（RLS用）                                               |
+| `user_id`    | `uuid`        | NOT NULL, FK → `auth.users(id)` ON DELETE CASCADE                | 冗長（RLS用）                                               |
+| `agent_name` | `text`        | NOT NULL                                                         | エージェント識別子 (`seo-specialist` 等)                    |
+| `status`     | `text`        | NOT NULL, CHECK (`status in ('ok','timeout','error','skipped')`) | ステータス                                                  |
+| `summary`    | `text`        | NULL                                                             | 専門家の中間回答要約                                        |
+| `tool_calls` | `jsonb`       | NOT NULL, default `'[]'::jsonb`                                  | `[{tool, input, output, ms, ok}]`                           |
+| `latency_ms` | `int`         | NULL                                                             | 実行時間                                                    |
+| `usage`      | `jsonb`       | NULL                                                             | `{input_tokens, output_tokens, cache_read, cache_creation}` |
+| `created_at` | `timestamptz` | NOT NULL, default `now()`                                        | 作成日時                                                    |
 
 ```sql
 create table public.specialist_traces (
@@ -215,11 +219,11 @@ create index idx_specialist_traces_user_created on public.specialist_traces (use
 
 Supabase 無料版フリーズ防止用（要件 4.3）。
 
-| カラム | 型 | 制約 | 説明 |
-|---|---|---|---|
-| `id` | `bigserial` | PK | 自動連番 |
-| `pinged_at` | `timestamptz` | NOT NULL, default `now()` | 実行日時 |
-| `source` | `text` | NOT NULL, default `'github-actions'` | 実行元識別 |
+| カラム      | 型            | 制約                                 | 説明       |
+| ----------- | ------------- | ------------------------------------ | ---------- |
+| `id`        | `bigserial`   | PK                                   | 自動連番   |
+| `pinged_at` | `timestamptz` | NOT NULL, default `now()`            | 実行日時   |
+| `source`    | `text`        | NOT NULL, default `'github-actions'` | 実行元識別 |
 
 ```sql
 create table public.keepalive_log (
@@ -270,13 +274,13 @@ Phase 1 では Cloud 側では実装せず、サーバー側で `INSERT` 前に�
 
 ## 5. インデックス戦略
 
-| テーブル | インデックス | 理由 | クエリ例 |
-|---|---|---|---|
-| `chat_sessions` | `(user_id, last_message_at desc)` | 自分のセッション一覧を最新順に表示 | `/api/sessions` |
-| `chat_messages` | `(session_id, created_at)` | セッション内メッセージ取得（昇順・降順両用） | 全履歴取得・直近N件 |
-| `chat_messages` | `(user_id, client_nonce) WHERE client_nonce IS NOT NULL` | 冪等チェック | 送信時の重複検出 |
-| `specialist_traces` | `(message_id)` | 1メッセージのトレース取得 | assistant 表示時 |
-| `specialist_traces` | `(user_id, created_at desc)` | 将来の個人別トレース一覧 | Phase 2 |
+| テーブル            | インデックス                                             | 理由                                         | クエリ例            |
+| ------------------- | -------------------------------------------------------- | -------------------------------------------- | ------------------- |
+| `chat_sessions`     | `(user_id, last_message_at desc)`                        | 自分のセッション一覧を最新順に表示           | `/api/sessions`     |
+| `chat_messages`     | `(session_id, created_at)`                               | セッション内メッセージ取得（昇順・降順両用） | 全履歴取得・直近N件 |
+| `chat_messages`     | `(user_id, client_nonce) WHERE client_nonce IS NOT NULL` | 冪等チェック                                 | 送信時の重複検出    |
+| `specialist_traces` | `(message_id)`                                           | 1メッセージのトレース取得                    | assistant 表示時    |
+| `specialist_traces` | `(user_id, created_at desc)`                             | 将来の個人別トレース一覧                     | Phase 2             |
 
 - 主キーには自動的に UNIQUE インデックスが付くので FK 単独のインデックスは基本不要
 - ただし `chat_messages.session_id` 単独参照は複合インデックスでカバーされるため追加不要
@@ -285,12 +289,12 @@ Phase 1 では Cloud 側では実装せず、サーバー側で `INSERT` 前に�
 
 ## 6. データ量試算
 
-| テーブル | 1日1ユーザーあたり | 6ユーザー × 1年 |
-|---|---|---|
-| `chat_sessions` | ~5行 | ~10,000行 |
-| `chat_messages` | ~100行 | ~220,000行 |
-| `specialist_traces` | ~200行 | ~440,000行 |
-| `keepalive_log` | 1行 | 365行 |
+| テーブル            | 1日1ユーザーあたり | 6ユーザー × 1年 |
+| ------------------- | ------------------ | --------------- |
+| `chat_sessions`     | ~5行               | ~10,000行       |
+| `chat_messages`     | ~100行             | ~220,000行      |
+| `specialist_traces` | ~200行             | ~440,000行      |
+| `keepalive_log`     | 1行                | 365行           |
 
 Supabase 無料版 500MB DB 上限に対して、十分に余裕がある。
 
@@ -299,6 +303,7 @@ Supabase 無料版 500MB DB 上限に対して、十分に余裕がある。
 ## 7. マイグレーション戦略
 
 ### 7.1 ファイル配置
+
 ```
 supabase/
 ├── config.toml
@@ -310,15 +315,18 @@ supabase/
 ```
 
 ### 7.2 命名規則
+
 - タイムスタンプ `YYYYMMDDHHMMSS` + 内容の英小文字スネークケース
 - 1マイグレーション = 1論理変更（複数テーブル追加は同ファイルで可）
 
 ### 7.3 適用
+
 - 開発: `supabase db reset` / `supabase migration up`
 - 本番: Supabase ダッシュボードから SQL 実行 or `supabase db push`
 - CI/CD からの自動適用は Phase 1 では行わない（手動適用）
 
 ### 7.4 ロールバック
+
 - マイグレーションファイル内に `-- DOWN` コメントを残し、必要に応じて逆SQLを実行
 - Supabase はマイグレーションの自動ロールバックを提供しないため、バックアップからの復元を基本とする
 

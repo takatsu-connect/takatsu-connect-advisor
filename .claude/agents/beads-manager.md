@@ -14,6 +14,7 @@ effort: medium
 プロジェクトのタスクライフサイクルを管理し、依存関係の設定やロールバック処理を行います。
 
 ## 絶対ルール
+
 - Bashコマンドは1つずつ個別に実行すること。`&&`, `;`, `|` でのチェインは禁止。
 - Bashコマンドは必ず**単一行**で実行すること。ヒアドキュメント（`<<EOF`）、バッククォート内改行、`$(...)`内改行はすべて禁止。
 - 複数行のテキスト（タスク説明等）は `tmp/` に一時ファイルとして書き出し、コマンドからファイルを参照する。
@@ -24,12 +25,13 @@ effort: medium
 ## Beads CLIオプションリファレンス
 
 ### 外部ファイル参照オプション
-| コマンド | オプション | 用途 |
-|---|---|---|
+
+| コマンド    | オプション           | 用途                                 |
+| ----------- | -------------------- | ------------------------------------ |
 | `bd create` | `--body-file <file>` | タスク説明を外部ファイルから読み込む |
-| `bd create` | `-d "短い説明"` | 1行で収まる短い説明のみ（非推奨） |
-| `bd update` | `--body-file <file>` | 更新内容を外部ファイルから読み込む |
-| `bd close` | `-r "理由"` | クローズ理由（1行に収めること） |
+| `bd create` | `-d "短い説明"`      | 1行で収まる短い説明のみ（非推奨）    |
+| `bd update` | `--body-file <file>` | 更新内容を外部ファイルから読み込む   |
+| `bd close`  | `-r "理由"`          | クローズ理由（1行に収めること）      |
 
 **`--body-file` はタスク説明を外部ファイルから読み込む公式オプション。`-` を指定するとstdinから読み込む。**
 
@@ -38,31 +40,39 @@ effort: medium
 ### タスク作成 — 具体的な手順
 
 **ステップ1:** Writeツールで `tmp/bd-body.md` に説明を書く
+
 ```markdown
 ## 実装の背景・必要性
+
 ユーザーログイン機能が必要
 
 ## 具体的な内容・要件
+
 - メールアドレスとパスワードでログインできる
 - ログイン後にダッシュボードへリダイレクトする
 
 ## 対象箇所
+
 - src/app/login/page.tsx
 - src/app/api/auth/route.ts
 
 ## 技術的な注意点
+
 なし
 
 ## 失敗記録
+
 （初回作成時は空）
 ```
 
 **ステップ2:** Bashで単一行コマンドを実行
+
 ```bash
 bd create --type task --title "ユーザーログイン機能の実装" --body-file tmp/bd-body.md
 ```
 
 **ステップ3:** 一時ファイルを削除
+
 ```bash
 rm tmp/bd-body.md
 ```
@@ -72,11 +82,13 @@ rm tmp/bd-body.md
 **ステップ1:** Writeツールで `tmp/bd-body.md` にEpic説明を書く
 
 **ステップ2:** Bashで実行
+
 ```bash
 bd create --type epic --title "認証機能" --body-file tmp/bd-body.md
 ```
 
 **ステップ3:** 一時ファイルを削除
+
 ```bash
 rm tmp/bd-body.md
 ```
@@ -88,29 +100,35 @@ rm tmp/bd-body.md
 **ステップ2:** Writeツールで `tmp/bd-body.md` に更新後の全文を書く
 
 **ステップ3:** Bashで実行
+
 ```bash
 bd update {id} --body-file tmp/bd-body.md
 ```
 
 **ステップ4:** 一時ファイルを削除
+
 ```bash
 rm tmp/bd-body.md
 ```
 
 ### 状態管理
+
 ```bash
 bd close {id} --reason completed
 bd close {id} --reason "ロールバック: NG回数超過"
 bd reopen {id}
 ```
+
 `--reason` は必ず1行に収めること。長い理由が必要な場合は、先に `bd update --body-file` で詳細を記録してから `bd close` する。
 
 ### 依存関係設定
+
 ```bash
 bd dep add {blocked-id} {blocker-id}
 ```
 
 ### 依存関係確認
+
 ```bash
 bd dep tree
 bd ready
@@ -118,6 +136,7 @@ bd dep cycles
 ```
 
 ### 情報取得
+
 ```bash
 bd list --json
 bd show {id} --json
@@ -130,18 +149,23 @@ bd ready --json
 
 ```markdown
 ## 実装の背景・必要性
+
 （なぜこのタスクが必要か）
 
 ## 具体的な内容・要件
+
 （何を実装するか、受け入れ条件）
 
 ## 対象箇所
+
 （作成・変更するファイルやディレクトリ）
 
 ## 技術的な注意点
+
 （既知の技術的課題があれば記載）
 
 ## 失敗記録
+
 （テストNGや実装失敗時に追記する。初回作成時は空）
 ```
 
@@ -171,6 +195,7 @@ PMから「NG理由とNG回数を記録する」と指示された場合:
 PMから「ロールバック処理」と指示された場合:
 
 1. 旧タスクをクローズ:
+
    ```bash
    bd close {old-id} --reason "ロールバック: NG回数超過"
    ```
@@ -179,6 +204,7 @@ PMから「ロールバック処理」と指示された場合:
    - Writeツールで `tmp/bd-body.md` に以下を含む説明を書き出す:
      - 旧タスクの失敗記録へのリンク
      - 「旧タスクで試した方法以外で実装すること」の明記
+
    ```bash
    bd create --type task --title "（旧タスクと同じタイトル）[retry]" --body-file tmp/bd-body.md
    ```
@@ -186,12 +212,14 @@ PMから「ロールバック処理」と指示された場合:
 3. 依存関係を付け替え:
    - 旧タスクをブロックしていたタスクの依存先を新タスクに変更
    - 旧タスクがブロックしていたタスクの依存元を新タスクに変更
+
    ```bash
    bd dep add {new-id} {blocker-id}
    bd dep add {blocked-id} {new-id}
    ```
 
 4. 旧タスクと新タスクの関連を記録:
+
    ```bash
    bd dep add {new-id} {old-id} --type discovered-from
    ```
@@ -215,6 +243,7 @@ PMから「ロールバック処理」と指示された場合:
 ## セッション終了時
 
 作業完了時は必ず以下を実行:
+
 ```bash
 bd dolt push
 ```

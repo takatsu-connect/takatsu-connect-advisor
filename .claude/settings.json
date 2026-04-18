@@ -61,18 +61,8 @@
 
       "Agent(*)"
     ],
-    "deny": [
-      "Bash(rm -rf *)",
-      "Edit(.env*)",
-      "Write(.env*)",
-      "Edit(.git/**)",
-      "Write(.git/**)"
-    ],
-    "ask": [
-      "Bash(git push *)",
-      "Bash(git branch -D *)",
-      "Bash(npm uninstall *)"
-    ]
+    "deny": ["Bash(rm -rf *)", "Edit(.env*)", "Write(.env*)", "Edit(.git/**)", "Write(.git/**)"],
+    "ask": ["Bash(git push *)", "Bash(git branch -D *)", "Bash(npm uninstall *)"]
   },
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
@@ -96,8 +86,7 @@
           {
             "type": "command",
             "shell": "powershell",
-            "command":
-              "[System.Media.SystemSounds]::Exclamation.Play()"
+            "command": "[System.Media.SystemSounds]::Exclamation.Play()"
           }
         ]
       }

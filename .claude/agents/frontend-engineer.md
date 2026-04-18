@@ -16,12 +16,14 @@ Reactベースのフロントエンド実装を担当します。
 **実装を開始する前に、必ず CLAUDE.md の「技術スタック」セクションを読み、使用フレームワーク（Next.js or React + Vite）を確認すること。**
 
 ## 絶対ルール
+
 - Bashコマンドは1つずつ個別に実行すること。`&&`, `;`, `|` でのチェインは禁止。
 - git操作は行わない（Git管理者の責務）。
 - Beads操作は行わない（Beads管理者の責務）。
 - テストコードの実装は行わない（テストエンジニアの責務）。
 
 ## 技術スタック
+
 - 言語: TypeScript
 - スタイリング: CSS Modules
 - **Tailwind CSSの使用は厳禁**
@@ -31,12 +33,14 @@ Reactベースのフロントエンド実装を担当します。
 ## フレームワークに応じた実装方針
 
 ### Next.js (App Router) の場合
+
 - Server Components をデフォルトとし、`"use client"` はインタラクティブ要素のみ
 - Server Components でデータ取得し、Client Components に props で渡す
 - ディレクトリ: `src/app/` 以下にページ・レイアウトを配置
 - 判断に迷ったら PM に `nextjs-specialist` への相談を依頼する
 
 ### React + Vite (SPA) の場合
+
 - すべてクライアントサイドレンダリング
 - react-router でルーティング
 - データ取得は useEffect / tanstack-query 等
@@ -44,6 +48,7 @@ Reactベースのフロントエンド実装を担当します。
 - 判断に迷ったら PM に `react-vite-specialist` への相談を依頼する
 
 ## 共通のディレクトリ構造
+
 - `src/components/`: 共有コンポーネント
 - `src/components/ui/`: UIプリミティブ
 - `src/hooks/`: カスタムフック
@@ -51,6 +56,7 @@ Reactベースのフロントエンド実装を担当します。
 - `src/types/`: 型定義
 
 ## コーディング規約
+
 - コンポーネントは関数コンポーネントで実装
 - Props型はコンポーネントファイル内で定義
 - エクスポートは名前付きエクスポートを優先
@@ -68,6 +74,7 @@ Reactベースのフロントエンド実装を担当します。
 8. 実装結果をPMに報告
 
 ## 品質基準
+
 - TypeScriptの型エラーがないこと
 - リントの警告がないこと
 - アクセシビリティ: 適切なHTML要素の使用、aria属性の付与

@@ -1,6 +1,7 @@
 # スタイリング・デザインシステム設計書
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [フロントエンド設計](./frontend-design.md)
 - [アプリ構成](./app-architecture.md)
@@ -41,29 +42,29 @@ src/components/*/*.module.css  ← コンポーネント個別スタイル
 ```css
 :root {
   /* Brand */
-  --color-brand-primary:   #2c6e8f;   /* 高津の青みを想起 */
-  --color-brand-secondary: #e4a853;   /* アクセント（金茶） */
+  --color-brand-primary: #2c6e8f; /* 高津の青みを想起 */
+  --color-brand-secondary: #e4a853; /* アクセント（金茶） */
 
   /* Neutrals */
-  --color-bg:              #fafafa;   /* アプリ背景 */
-  --color-surface:         #ffffff;   /* カード・バブル */
-  --color-surface-alt:     #f2f3f5;   /* 専門家バブル背景 */
-  --color-border:          #e3e5e8;
-  --color-border-strong:   #c9cdd3;
+  --color-bg: #fafafa; /* アプリ背景 */
+  --color-surface: #ffffff; /* カード・バブル */
+  --color-surface-alt: #f2f3f5; /* 専門家バブル背景 */
+  --color-border: #e3e5e8;
+  --color-border-strong: #c9cdd3;
 
-  --color-text:            #1e2125;   /* 本文 */
-  --color-text-muted:      #5c636b;   /* セカンダリ */
-  --color-text-disabled:   #9aa0a6;
+  --color-text: #1e2125; /* 本文 */
+  --color-text-muted: #5c636b; /* セカンダリ */
+  --color-text-disabled: #9aa0a6;
 
   /* Semantic */
-  --color-success:         #2e8b57;
-  --color-warning:         #c17f00;
-  --color-error:           #c1362c;
-  --color-info:            #2e6fbf;
+  --color-success: #2e8b57;
+  --color-warning: #c17f00;
+  --color-error: #c1362c;
+  --color-info: #2e6fbf;
 
   /* Chat roles */
-  --color-bubble-user-bg:      #2c6e8f;
-  --color-bubble-user-text:    #ffffff;
+  --color-bubble-user-bg: #2c6e8f;
+  --color-bubble-user-text: #ffffff;
   --color-bubble-assistant-bg: #ffffff;
   --color-bubble-assistant-text: #1e2125;
   --color-bubble-assistant-border: #e3e5e8;
@@ -74,6 +75,7 @@ src/components/*/*.module.css  ← コンポーネント個別スタイル
 ```
 
 ### 3.2 コントラスト確認
+
 - `--color-text` (#1e2125) on `--color-bg` (#fafafa): コントラスト 15:1（AAA）
 - `--color-bubble-user-text` (#fff) on `--color-bubble-user-bg` (#2c6e8f): 約 5.6:1（AA）
 - `--color-text-muted` on `--color-bg`: 約 6.2:1（AA）
@@ -83,26 +85,24 @@ src/components/*/*.module.css  ← コンポーネント個別スタイル
 ```css
 :root {
   --font-sans:
-    -apple-system, BlinkMacSystemFont,
-    "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-    "Noto Sans JP", "Yu Gothic Medium", "Meiryo", sans-serif;
-  --font-mono:
-    "SFMono-Regular", "Menlo", "Consolas", "Hiragino Kaku Gothic ProN", monospace;
+    -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic Medium", "Meiryo", sans-serif;
+  --font-mono: "SFMono-Regular", "Menlo", "Consolas", "Hiragino Kaku Gothic ProN", monospace;
 
-  --font-size-xs:   0.75rem;   /* 12px */
-  --font-size-sm:   0.875rem;  /* 14px */
-  --font-size-base: 1rem;      /* 16px */
-  --font-size-md:   1.0625rem; /* 17px, モバイル読みやすさ */
-  --font-size-lg:   1.25rem;   /* 20px */
-  --font-size-xl:   1.5rem;    /* 24px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-md: 1.0625rem; /* 17px, モバイル読みやすさ */
+  --font-size-lg: 1.25rem; /* 20px */
+  --font-size-xl: 1.5rem; /* 24px */
 
-  --line-height-tight:  1.25;
+  --line-height-tight: 1.25;
   --line-height-normal: 1.55;
   --line-height-relaxed: 1.75;
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
-  --font-weight-bold:   700;
+  --font-weight-bold: 700;
 }
 ```
 
@@ -115,14 +115,14 @@ src/components/*/*.module.css  ← コンポーネント個別スタイル
 ```css
 :root {
   --space-0: 0;
-  --space-1: 0.25rem;  /* 4px */
-  --space-2: 0.5rem;   /* 8px */
-  --space-3: 0.75rem;  /* 12px */
-  --space-4: 1rem;     /* 16px */
-  --space-5: 1.5rem;   /* 24px */
-  --space-6: 2rem;     /* 32px */
-  --space-7: 3rem;     /* 48px */
-  --space-8: 4rem;     /* 64px */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+  --space-7: 3rem; /* 48px */
+  --space-8: 4rem; /* 64px */
 }
 ```
 
@@ -135,9 +135,9 @@ src/components/*/*.module.css  ← コンポーネント個別スタイル
   --radius-lg: 16px;
   --radius-pill: 9999px;
 
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
-  --shadow-md: 0 6px 16px rgba(0,0,0,0.10);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.1);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 120ms;
@@ -150,12 +150,12 @@ src/components/*/*.module.css  ← コンポーネント個別スタイル
 
 ```css
 :root {
-  --z-base:    0;
+  --z-base: 0;
   --z-content: 10;
-  --z-header:  20;
-  --z-input:   30;
-  --z-toast:   50;
-  --z-modal:   100;
+  --z-header: 20;
+  --z-input: 30;
+  --z-toast: 50;
+  --z-modal: 100;
 }
 ```
 
@@ -187,10 +187,16 @@ CSS Custom Properties ではメディアクエリを値に使えないため、*
   padding: var(--space-3);
 }
 @media (min-width: 641px) {
-  .container { padding: var(--space-5); }
+  .container {
+    padding: var(--space-5);
+  }
 }
 @media (min-width: 1025px) {
-  .container { padding: var(--space-6); max-width: 960px; margin-inline: auto; }
+  .container {
+    padding: var(--space-6);
+    max-width: 960px;
+    margin-inline: auto;
+  }
 }
 ```
 
@@ -199,9 +205,19 @@ CSS Custom Properties ではメディアクエリを値に使えないため、*
 ## 5. グローバルリセット (`reset.css`)
 
 ```css
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
 body {
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
@@ -211,17 +227,45 @@ body {
   min-height: 100dvh;
   font-feature-settings: "palt" 1; /* 和文の詰め */
 }
-button { font: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
-a { color: var(--color-brand-primary); text-decoration: underline; }
-a:hover { opacity: 0.8; }
-img, svg { display: block; max-width: 100%; }
-input, textarea { font: inherit; color: inherit; }
-textarea { resize: vertical; }
-:focus { outline: none; }
-:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+button {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+a {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+}
+a:hover {
+  opacity: 0.8;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+textarea {
+  resize: vertical;
+}
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
 
 @media (min-width: 1025px) {
-  body { font-size: var(--font-size-base); }
+  body {
+    font-size: var(--font-size-base);
+  }
 }
 ```
 
@@ -230,18 +274,24 @@ textarea { resize: vertical; }
 ## 6. コンポーネント別スタイル指針
 
 ### 6.1 ChatWindow
+
 ```css
 .chatWindow {
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
   max-width: 100%;
 }
 @media (min-width: 1025px) {
-  .chatWindow { max-width: 960px; margin-inline: auto; }
+  .chatWindow {
+    max-width: 960px;
+    margin-inline: auto;
+  }
 }
 ```
 
 ### 6.2 MessageBubble
+
 ```css
 .bubble {
   padding: var(--space-3) var(--space-4);
@@ -264,18 +314,25 @@ textarea { resize: vertical; }
   border: 1px solid var(--color-bubble-assistant-border);
   border-radius: var(--radius-md) var(--radius-md) var(--radius-md) var(--radius-sm);
 }
-@media (min-width: 641px) { .bubble { max-width: 72%; } }
+@media (min-width: 641px) {
+  .bubble {
+    max-width: 72%;
+  }
+}
 ```
 
 ### 6.3 MessageInput
+
 ```css
 .form {
-  display: flex; gap: var(--space-2);
+  display: flex;
+  gap: var(--space-2);
   padding: var(--space-3);
   padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
-  position: sticky; bottom: 0;
+  position: sticky;
+  bottom: 0;
   z-index: var(--z-input);
 }
 .textarea {
@@ -288,22 +345,28 @@ textarea { resize: vertical; }
   font-size: var(--font-size-md);
 }
 .submit {
-  min-width: 64px; min-height: 44px;
+  min-width: 64px;
+  min-height: 44px;
   padding: 0 var(--space-4);
   background: var(--color-brand-primary);
   color: #fff;
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-medium);
 }
-.submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 ```
 
 ### 6.4 ContextProgressBar
 
 要件 3.5.3「ごく簡単」:
+
 ```css
 .progress {
-  height: 2px; width: 100%;
+  height: 2px;
+  width: 100%;
   background: var(--color-border);
   overflow: hidden;
 }
@@ -315,6 +378,7 @@ textarea { resize: vertical; }
 ```
 
 ### 6.5 SpecialistTrace
+
 ```css
 .trace {
   margin-top: var(--space-2);
@@ -328,7 +392,9 @@ textarea { resize: vertical; }
   padding: var(--space-2) var(--space-3);
   color: var(--color-text-muted);
 }
-.trace[open] summary { border-bottom: 1px solid var(--color-border); }
+.trace[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
 ```
 
 ---
@@ -353,7 +419,12 @@ textarea { resize: vertical; }
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 ```
 
@@ -361,11 +432,11 @@ textarea { resize: vertical; }
 
 ## 9. フォーム・状態の一貫性
 
-| 状態 | 見た目 |
-|---|---|
-| `:hover`（PC） | 背景を微暗化 or opacity 0.9 |
-| `:focus-visible` | `--color-focus-ring` の 2px ring |
-| `:disabled` | opacity 0.5, `cursor: not-allowed` |
+| 状態                  | 見た目                                |
+| --------------------- | ------------------------------------- |
+| `:hover`（PC）        | 背景を微暗化 or opacity 0.9           |
+| `:focus-visible`      | `--color-focus-ring` の 2px ring      |
+| `:disabled`           | opacity 0.5, `cursor: not-allowed`    |
 | `aria-invalid="true"` | border: `--color-error`, 下にエラー文 |
 
 ---

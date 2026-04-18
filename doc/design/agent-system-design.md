@@ -1,6 +1,7 @@
 # マルチエージェントシステム 設計書
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [プロンプト設計](./prompt-design.md)
 - [API設計](./api-design.md)
@@ -27,6 +28,7 @@
 - **Orchestrator** (Sonnet 4.6): 結果を統合しストリーミング応答
 
 マルチモデル戦略の意図（要件 9）:
+
 - 専門家は軽量 Haiku で十分な品質 + 並列実行で速度維持
 - 統合は複雑な推論が必要なため Sonnet
 
@@ -62,21 +64,21 @@ src/lib/tools/
 
 ```ts
 // src/lib/agents/types.ts
-export type AgentRole = 'classifier' | 'orchestrator' | 'specialist';
+export type AgentRole = "classifier" | "orchestrator" | "specialist";
 
 export interface AgentDefinition {
-  name: string;              // "seo-specialist"
-  displayName: string;       // "SEO専門家"
-  description: string;       // カード表示・trace用の説明
+  name: string; // "seo-specialist"
+  displayName: string; // "SEO専門家"
+  description: string; // カード表示・trace用の説明
   role: AgentRole;
-  model: string;             // "claude-haiku-4-5" 等（未指定時は role ごとの env で解決）
-  systemPrompt: string;      // include 展開済みの本文
-  tools: string[];           // ["query_search_console", "fetch_webpage"]
+  model: string; // "claude-haiku-4-5" 等（未指定時は role ごとの env で解決）
+  systemPrompt: string; // include 展開済みの本文
+  tools: string[]; // ["query_search_console", "fetch_webpage"]
   temperature?: number;
   maxTokens?: number;
-  include?: string[];        // 参考情報として保持（再ロード検知用）
-  filePath: string;          // ロード元
-  mtimeMs: number;           // ホットリロード検知
+  include?: string[]; // 参考情報として保持（再ロード検知用）
+  filePath: string; // ロード元
+  mtimeMs: number; // ホットリロード検知
 }
 ```
 
@@ -85,6 +87,7 @@ export interface AgentDefinition {
 ## 4. エージェント定義ローダー
 
 ### 4.1 要件の再確認（要件 3.3.3 / 3.3.4）
+
 - Markdown + YAML フロントマター
 - `prompts/agents/*.md` にドロップするだけで認識
 - 起動時スキャン・ホットリロード対応
@@ -94,6 +97,7 @@ export interface AgentDefinition {
 Next.js スペシャリストの助言に従い、**起動時一括読み込みではなく、リクエストごとに読み込み + mtimeキャッシュ**を採用する。
 
 理由:
+
 - Vercel Serverless では cold start とファイルシステムの状態が一致しないケースがある
 - 開発時のホットリロード相当（mtime 差分で再読込）
 - キャッシュはプロセスローカル `Map<filePath, AgentDefinition>`
@@ -102,17 +106,17 @@ Next.js スペシャリストの助言に従い、**起動時一括読み込み�
 
 ```ts
 // src/lib/agents/loader.ts
-import 'server-only';
-import fs from 'node:fs';
-import path from 'node:path';
-import { z } from 'zod';
-import matter from 'gray-matter';
+import "server-only";
+import fs from "node:fs";
+import path from "node:path";
+import { z } from "zod";
+import matter from "gray-matter";
 
 const FRONTMATTER_SCHEMA = z.object({
   name: z.string().regex(/^[a-z0-9-]+$/),
   displayName: z.string(),
   description: z.string(),
-  role: z.enum(['classifier','orchestrator','specialist']).default('specialist'),
+  role: z.enum(["classifier", "orchestrator", "specialist"]).default("specialist"),
   model: z.string().optional(),
   tools: z.array(z.string()).default([]),
   include: z.array(z.string()).default([]),
@@ -127,7 +131,7 @@ export function loadAgent(filePath: string): AgentDefinition {
   const cached = cache.get(filePath);
   if (cached && cached.mtimeMs === stat.mtimeMs) return cached;
 
-  const raw = fs.readFileSync(filePath, 'utf8');
+  const raw = fs.readFileSync(filePath, "utf8");
   const { data, content } = matter(raw);
   const fm = FRONTMATTER_SCHEMA.parse(data);
 
@@ -144,22 +148,24 @@ export function loadAgent(filePath: string): AgentDefinition {
   return agent;
 }
 
-export function loadAllAgents(dir = 'prompts/agents'): AgentDefinition[] {
+export function loadAllAgents(dir = "prompts/agents"): AgentDefinition[] {
   const full = path.join(process.cwd(), dir);
-  return fs.readdirSync(full)
-    .filter(f => f.endsWith('.md'))
-    .map(f => loadAgent(path.join(full, f)));
+  return fs
+    .readdirSync(full)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => loadAgent(path.join(full, f)));
 }
 
 export function findAgent(name: string): AgentDefinition | null {
   const all = loadAllAgents();
-  return all.find(a => a.name === name) ?? null;
+  return all.find((a) => a.name === name) ?? null;
 }
 ```
 
 ### 4.4 include の展開
 
 `expandIncludes(content, include)` は:
+
 1. 前処理として `include` 配列の各パス（`shared/takatsu-connect.md` 等）を `prompts/` ルート基準で読み込む
 2. 読み込んだテキストを **本文の先頭に prepend** する（または `<!--[[include:xxx]]-->` マーカー置換）
 3. さらに本文中の `{{include:shared/xxx.md}}` という軽量マーカーもサポート（任意）
@@ -172,10 +178,13 @@ export function findAgent(name: string): AgentDefinition | null {
 function resolveModel(agent: AgentDefinition): string {
   if (agent.model) return agent.model;
   switch (agent.role) {
-    case 'classifier':   return env.CLASSIFIER_MODEL;
-    case 'orchestrator': return env.ORCHESTRATOR_MODEL;
-    case 'specialist':
-    default:             return env.SPECIALIST_MODEL;
+    case "classifier":
+      return env.CLASSIFIER_MODEL;
+    case "orchestrator":
+      return env.ORCHESTRATOR_MODEL;
+    case "specialist":
+    default:
+      return env.SPECIALIST_MODEL;
   }
 }
 ```
@@ -183,6 +192,7 @@ function resolveModel(agent: AgentDefinition): string {
 ### 4.6 バリデーションスクリプト
 
 `scripts/validate-agents.ts`:
+
 - すべての `prompts/agents/*.md` をロードし、スキーマ検証
 - `include` パスの実在チェック
 - `tools` が `src/lib/tools` に登録済みかチェック
@@ -198,12 +208,12 @@ function resolveModel(agent: AgentDefinition): string {
 
 ### 5.1 一覧（要件 3.4）
 
-| ツール名 | 入力 | 出力 | タイムアウト |
-|---|---|---|---|
-| `query_google_analytics` | `{dateRange, dimensions[], metrics[], filters?}` | GAレポートJSON | 5s |
-| `query_search_console` | `{startDate, endDate, dimensions[], rowLimit?}` | GSCレポートJSON | 5s |
-| `fetch_wp_posts` | `{search?, slug?, perPage, page, orderby?}` | 投稿配列 | 5s |
-| `fetch_webpage` | `{url}` | `{status, title, description, h1[], textSnippet}` | 5s |
+| ツール名                 | 入力                                             | 出力                                              | タイムアウト |
+| ------------------------ | ------------------------------------------------ | ------------------------------------------------- | ------------ |
+| `query_google_analytics` | `{dateRange, dimensions[], metrics[], filters?}` | GAレポートJSON                                    | 5s           |
+| `query_search_console`   | `{startDate, endDate, dimensions[], rowLimit?}`  | GSCレポートJSON                                   | 5s           |
+| `fetch_wp_posts`         | `{search?, slug?, perPage, page, orderby?}`      | 投稿配列                                          | 5s           |
+| `fetch_webpage`          | `{url}`                                          | `{status, title, description, h1[], textSnippet}` | 5s           |
 
 `consult_specialist` は **採用しない**（要件 9「オーケストレーターが直接統合」のシンプル優先方針）。
 
@@ -213,21 +223,21 @@ function resolveModel(agent: AgentDefinition): string {
 // src/lib/tools/schemas.ts
 export const toolSchemas = {
   query_search_console: {
-    name: 'query_search_console',
-    description: 'Google Search Consoleから検索クエリ・流入データを取得する。',
+    name: "query_search_console",
+    description: "Google Search Consoleから検索クエリ・流入データを取得する。",
     input_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        startDate: { type: 'string', description: 'YYYY-MM-DD' },
-        endDate:   { type: 'string', description: 'YYYY-MM-DD' },
+        startDate: { type: "string", description: "YYYY-MM-DD" },
+        endDate: { type: "string", description: "YYYY-MM-DD" },
         dimensions: {
-          type: 'array',
-          items: { enum: ['query','page','country','device','date'] },
-          description: '集計次元',
+          type: "array",
+          items: { enum: ["query", "page", "country", "device", "date"] },
+          description: "集計次元",
         },
-        rowLimit: { type: 'integer', minimum: 1, maximum: 500, default: 25 },
+        rowLimit: { type: "integer", minimum: 1, maximum: 500, default: 25 },
       },
-      required: ['startDate','endDate','dimensions'],
+      required: ["startDate", "endDate", "dimensions"],
     },
   },
   // ... 他ツール
@@ -242,9 +252,9 @@ export type ToolExecutor = (input: unknown, ctx: ToolContext) => Promise<unknown
 
 export const toolExecutors: Record<string, ToolExecutor> = {
   query_google_analytics: queryGA,
-  query_search_console:   queryGSC,
-  fetch_wp_posts:         fetchWpPosts,
-  fetch_webpage:          fetchWebpage,
+  query_search_console: queryGSC,
+  fetch_wp_posts: fetchWpPosts,
+  fetch_webpage: fetchWebpage,
 };
 
 export async function runTool(name: string, input: unknown, ctx: ToolContext) {
@@ -263,6 +273,7 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext) {
 ### 5.4 セキュリティ（fetch_webpage）
 
 詳細は [security-design.md #7 外部API](./security-design.md#7-外部-api-呼び出しのリスク) を参照。
+
 - スキーマ `http/https` のみ
 - プライベートIP 拒否
 - 3MB 上限
@@ -274,13 +285,16 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext) {
 ## 6. Classifier 実行
 
 ### 6.1 責務
+
 ユーザー最新質問 + 直近履歴を読み、**呼ぶべき専門家の名前配列**を返す。
 
 ### 6.2 入出力
+
 - 入力: 直近メッセージ配列（N=20件上限）
 - 出力: `{ specialists: string[], reasoning: string }`
 
 ### 6.3 実装方針
+
 - Claude API で **tool_use ではなく JSON 構造化応答** で返させる（tool_useより軽量・速い）
 - プロンプトで出力スキーマを明示:
   ```
@@ -292,12 +306,14 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext) {
 - 空配列の場合は `orchestrator` のみで回答する（専門家なし）
 
 ### 6.4 パラメータ
+
 - `model`: `env.CLASSIFIER_MODEL`（Haiku 4.5）
 - `max_tokens`: 256
 - `temperature`: 0.2（分類は決定論寄り）
 - タイムアウト: 5秒
 
 ### 6.5 失敗時フォールバック
+
 - タイムアウト or パース失敗 → `{ specialists: [], reasoning: 'classifier失敗のため統合のみで応答' }`
 
 ---
@@ -305,18 +321,20 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext) {
 ## 7. Specialist 実行
 
 ### 7.1 責務
+
 担当領域の知見 + tool_use を駆使して、要点（中間回答）を返す。
 
 ### 7.2 入出力
+
 - 入力: 直近履歴 + Classifier の reasoning（任意コンテキスト）
 - 出力: `SpecialistResult`
   ```ts
   type SpecialistResult = {
     agent: string;
     displayName: string;
-    status: 'ok' | 'timeout' | 'error' | 'skipped';
-    summary: string;               // LLMの最終テキスト
-    toolCalls: ToolCallLog[];      // 呼び出されたツールの記録
+    status: "ok" | "timeout" | "error" | "skipped";
+    summary: string; // LLMの最終テキスト
+    toolCalls: ToolCallLog[]; // 呼び出されたツールの記録
     latencyMs: number;
     usage?: ClaudeUsage;
   };
@@ -325,9 +343,12 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext) {
 ### 7.3 tool_use ループ
 
 ```ts
-async function runSpecialist(agent: AgentDefinition, history: Message[]): Promise<SpecialistResult> {
+async function runSpecialist(
+  agent: AgentDefinition,
+  history: Message[],
+): Promise<SpecialistResult> {
   const messages = toClaudeMessages(history);
-  const tools = agent.tools.map(t => toolSchemas[t]);
+  const tools = agent.tools.map((t) => toolSchemas[t]);
   const started = Date.now();
   const calls: ToolCallLog[] = [];
 
@@ -343,54 +364,91 @@ async function runSpecialist(agent: AgentDefinition, history: Message[]): Promis
       temperature: agent.temperature ?? 0.7,
     });
 
-    if (res.stop_reason === 'end_turn') {
-      return { agent: agent.name, displayName: agent.displayName, status: 'ok',
-               summary: extractText(res), toolCalls: calls, latencyMs: Date.now()-started, usage: res.usage };
+    if (res.stop_reason === "end_turn") {
+      return {
+        agent: agent.name,
+        displayName: agent.displayName,
+        status: "ok",
+        summary: extractText(res),
+        toolCalls: calls,
+        latencyMs: Date.now() - started,
+        usage: res.usage,
+      };
     }
-    if (res.stop_reason === 'tool_use') {
-      const toolUses = res.content.filter(c => c.type === 'tool_use');
+    if (res.stop_reason === "tool_use") {
+      const toolUses = res.content.filter((c) => c.type === "tool_use");
       // 並列でツール実行
-      const results = await Promise.all(toolUses.map(tu => runTool(tu.name, tu.input, ctx)));
-      for (const [tu, r] of zip(toolUses, results)) calls.push({tool: tu.name, input: tu.input, ok: r.ok, ms: r.latencyMs});
+      const results = await Promise.all(toolUses.map((tu) => runTool(tu.name, tu.input, ctx)));
+      for (const [tu, r] of zip(toolUses, results))
+        calls.push({ tool: tu.name, input: tu.input, ok: r.ok, ms: r.latencyMs });
       currentMessages = [
         ...currentMessages,
-        { role: 'assistant', content: res.content },
-        { role: 'user', content: toolUses.map((tu,j) => ({
-            type: 'tool_result', tool_use_id: tu.id,
-            content: JSON.stringify(results[j].ok ? results[j].result : { error: results[j].error }),
-          }))},
+        { role: "assistant", content: res.content },
+        {
+          role: "user",
+          content: toolUses.map((tu, j) => ({
+            type: "tool_result",
+            tool_use_id: tu.id,
+            content: JSON.stringify(
+              results[j].ok ? results[j].result : { error: results[j].error },
+            ),
+          })),
+        },
       ];
       continue;
     }
     // 想定外のstop_reason
-    return { agent: agent.name, displayName: agent.displayName, status: 'error',
-             summary: 'stop_reason: '+res.stop_reason, toolCalls: calls, latencyMs: Date.now()-started };
+    return {
+      agent: agent.name,
+      displayName: agent.displayName,
+      status: "error",
+      summary: "stop_reason: " + res.stop_reason,
+      toolCalls: calls,
+      latencyMs: Date.now() - started,
+    };
   }
-  return { agent: agent.name, displayName: agent.displayName, status: 'error',
-           summary: 'tool_use ループが上限に達しました', toolCalls: calls, latencyMs: Date.now()-started };
+  return {
+    agent: agent.name,
+    displayName: agent.displayName,
+    status: "error",
+    summary: "tool_use ループが上限に達しました",
+    toolCalls: calls,
+    latencyMs: Date.now() - started,
+  };
 }
 ```
 
 ### 7.4 ツール並列化
+
 - 1回の応答で複数の `tool_use` が返った場合、**`Promise.all` で並列実行**
 - claw-code の学びを反映
 
 ### 7.5 タイムアウト（Promise.race）
+
 ```ts
 async function runSpecialistWithTimeout(agent: AgentDefinition, history: Message[]) {
   return Promise.race([
     runSpecialist(agent, history),
-    new Promise<SpecialistResult>(resolve =>
-      setTimeout(() => resolve({
-        agent: agent.name, displayName: agent.displayName, status: 'timeout',
-        summary: 'タイムアウトしました', toolCalls: [], latencyMs: SPECIALIST_TIMEOUT_MS,
-      }), env.SPECIALIST_TIMEOUT_MS),
+    new Promise<SpecialistResult>((resolve) =>
+      setTimeout(
+        () =>
+          resolve({
+            agent: agent.name,
+            displayName: agent.displayName,
+            status: "timeout",
+            summary: "タイムアウトしました",
+            toolCalls: [],
+            latencyMs: SPECIALIST_TIMEOUT_MS,
+          }),
+        env.SPECIALIST_TIMEOUT_MS,
+      ),
     ),
   ]);
 }
 ```
 
 ### 7.6 Graceful degradation
+
 - タイムアウト / エラー になった専門家は `status` 付きで結果に含める
 - Orchestrator には `status: 'ok'` のもののみ入力する（ノイズを排除）
 - すべて失敗しても Orchestrator は呼ぶ（知識ベースのみで回答）
@@ -400,11 +458,13 @@ async function runSpecialistWithTimeout(agent: AgentDefinition, history: Message
 ## 8. Orchestrator 実行
 
 ### 8.1 責務
+
 Specialist の結果配列 + 履歴を受け、ユーザーへの**統合応答**を**ストリーミング**で生成。
 
 ### 8.2 入力構成
 
 system プロンプトに Specialists の結果を **整形テキスト**として差し込む:
+
 ```
 <specialist_results>
 <result agent="seo-specialist" status="ok">
@@ -419,6 +479,7 @@ system プロンプトに Specialists の結果を **整形テキスト**とし�
 ユーザー履歴（`CONTEXT_MESSAGE_LIMIT=20`）は `messages` に渡す。
 
 ### 8.3 パラメータ
+
 - `model`: `env.ORCHESTRATOR_MODEL`（Sonnet 4.6）
 - `max_tokens`: 2048
 - `temperature`: 0.7
@@ -426,6 +487,7 @@ system プロンプトに Specialists の結果を **整形テキスト**とし�
 - タイムアウト: `maxDuration(60) - 経過時間 - 2秒バッファ`
 
 ### 8.4 ストリーミングの変換
+
 Anthropic SSE → プロジェクト独自 SSE に変換（詳細は [api-design.md](./api-design.md#3-post-apichat) の `content` イベント）。
 
 ```ts
@@ -452,30 +514,30 @@ export async function* runChatPipeline(input: {
   const { history, emit } = input;
 
   // 1. Classifier
-  emit('status', { phase: 'classify', text: '質問を分析中...' });
-  const classifier = findAgent('classifier');
+  emit("status", { phase: "classify", text: "質問を分析中..." });
+  const classifier = findAgent("classifier");
   const cls = await runClassifier(classifier, history);
-  emit('classification', cls);
+  emit("classification", cls);
 
   // 2. Specialists（並列）
   const agents = cls.specialists.map(findAgent).filter(Boolean);
   if (agents.length > 0) {
-    emit('status', { phase: 'specialist', text: buildStatusText(agents) });
-    agents.forEach(a => emit('specialist_start', { agent: a.name, displayName: a.displayName }));
-    const results = await Promise.all(agents.map(a => runSpecialistWithTimeout(a, history)));
-    for (const r of results) emit('specialist_result', r);
-    var okResults = results.filter(r => r.status === 'ok');
+    emit("status", { phase: "specialist", text: buildStatusText(agents) });
+    agents.forEach((a) => emit("specialist_start", { agent: a.name, displayName: a.displayName }));
+    const results = await Promise.all(agents.map((a) => runSpecialistWithTimeout(a, history)));
+    for (const r of results) emit("specialist_result", r);
+    var okResults = results.filter((r) => r.status === "ok");
   } else {
     var okResults = [];
   }
 
   // 3. Orchestrator (ストリーミング)
-  emit('status', { phase: 'orchestrate', text: '統合中...' });
-  const orch = findAgent('orchestrator');
-  let fullText = '';
+  emit("status", { phase: "orchestrate", text: "統合中..." });
+  const orch = findAgent("orchestrator");
+  let fullText = "";
   for await (const chunk of streamOrchestrator(orch, history, okResults)) {
     fullText += chunk.delta;
-    emit('content', chunk);
+    emit("content", chunk);
   }
   return { text: fullText, specialistResults: okResults, classification: cls };
 }
@@ -490,6 +552,7 @@ export async function* runChatPipeline(input: {
 ### 9.3 ローカル完全一致キャッシュ
 
 `/api/chat` 呼び出しの冒頭でキャッシュキーを計算:
+
 ```ts
 const key = sha256(JSON.stringify({
   model: env.ORCHESTRATOR_MODEL,
@@ -511,7 +574,10 @@ class LocalCache<T> {
   get(key: string): T | null {
     const e = this.store.get(key);
     if (!e) return null;
-    if (Date.now() > e.expiresAt) { this.store.delete(key); return null; }
+    if (Date.now() > e.expiresAt) {
+      this.store.delete(key);
+      return null;
+    }
     return e.value;
   }
   set(key: string, value: T, ttlSecs: number) {
@@ -528,6 +594,7 @@ export const localCache = new LocalCache<CachedChatResult>();
 ## 10. エージェント追加フロー
 
 非エンジニアが新しい専門家を追加する手順:
+
 1. `prompts/agents/new-specialist.md` を作成（既存のフロントマター雛形をコピー）
 2. `description`, `displayName`, `systemPrompt` を書く
 3. 必要なら `tools`, `include` を追記

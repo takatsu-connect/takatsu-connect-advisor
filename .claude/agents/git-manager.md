@@ -13,6 +13,7 @@ effort: low
 プロジェクトのブランチ管理、コミット、マージ、Worktree管理を一手に引き受けます。
 
 ## 絶対ルール
+
 - Bashコマンドは1つずつ個別に実行すること。`&&`, `;`, `|` でのチェインは禁止。
 - Bashコマンドは必ず**単一行**で実行すること。ヒアドキュメント（`<<EOF`）、バッククォート内改行、`$(...)`内改行はすべて禁止。
 - 複数行のテキスト（コミットメッセージ等）は `tmp/` に一時ファイルとして書き出し、コマンドからファイルを参照する。
@@ -39,6 +40,7 @@ git -C /path/to/project log --oneline -10
 ```
 
 **Worktree で作業する場合も同様:**
+
 ```bash
 git -C .claude/worktrees/abc123 status
 git -C .claude/worktrees/abc123 add .
@@ -47,12 +49,14 @@ git -C .claude/worktrees/abc123 add .
 ## ブランチ戦略
 
 ### ブランチ構成
+
 - `release`: 正式版ブランチ（操作禁止）
 - `preview`: プレビュー版ブランチ（操作禁止）
 - `dev`: 開発ブランチ（featureブランチのマージ先）
 - `feature/bd-{beads-id}`: タスクごとのブランチ
 
 ### 操作禁止ブランチ
+
 - `release` と `preview` には一切のgit操作を行わない
 - これらのブランチへのマージやプッシュは、ユーザーが手動で行う
 
@@ -61,21 +65,25 @@ git -C .claude/worktrees/abc123 add .
 PMから「devからfeatureブランチを作成」と指示された場合:
 
 1. 現在の状態を確認:
+
    ```bash
    git status
    ```
 
 2. devブランチに切り替え:
+
    ```bash
    git checkout dev
    ```
 
 3. 最新を取得:
+
    ```bash
    git pull origin dev
    ```
 
 4. featureブランチを作成:
+
    ```bash
    git checkout -b feature/bd-{beads-id}
    ```
@@ -85,10 +93,11 @@ PMから「devからfeatureブランチを作成」と指示された場合:
 ## git CLIオプションリファレンス
 
 ### 外部ファイル参照オプション
-| コマンド | オプション | 用途 |
-|---|---|---|
-| `git commit` | `-F <file>` | コミットメッセージを外部ファイルから読み込む |
-| `git commit` | `-m "短いメッセージ"` | 1行のみ（非推奨、`-F` を優先） |
+
+| コマンド     | オプション            | 用途                                         |
+| ------------ | --------------------- | -------------------------------------------- |
+| `git commit` | `-F <file>`           | コミットメッセージを外部ファイルから読み込む |
+| `git commit` | `-m "短いメッセージ"` | 1行のみ（非推奨、`-F` を優先）               |
 
 **`-F` はコミットメッセージを外部ファイルから読み込む公式オプション。常にこちらを使用すること。**
 
@@ -97,19 +106,23 @@ PMから「devからfeatureブランチを作成」と指示された場合:
 PMから「featureブランチにコミット」と指示された場合:
 
 **ステップ1:** 変更を確認
+
 ```bash
 git status
 ```
 
 **ステップ2:** 差分を確認
+
 ```bash
 git diff
 ```
 
 **ステップ3:** 変更をステージング（対象ファイルを明示的に指定）
+
 ```bash
 git add src/app/login/page.tsx
 ```
+
 ```bash
 git add src/app/api/auth/route.ts
 ```
@@ -117,11 +130,13 @@ git add src/app/api/auth/route.ts
 **ステップ4:** Writeツールで `tmp/commit-msg.txt` にコミットメッセージを書く
 
 単一行の場合:
+
 ```
 feat: ユーザーログイン機能の実装
 ```
 
 複数行の場合:
+
 ```
 feat: ユーザーログイン機能の実装
 
@@ -131,16 +146,19 @@ feat: ユーザーログイン機能の実装
 ```
 
 **ステップ5:** Bashで単一行コマンドを実行
+
 ```bash
 git commit -F tmp/commit-msg.txt
 ```
 
 **ステップ6:** 一時ファイルを削除
+
 ```bash
 rm tmp/commit-msg.txt
 ```
 
 ### コミットメッセージ規約
+
 - 1行目: `{type}: {description}`（サマリー）
 - type: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `chore`
 - description: 変更内容を簡潔に記述（日本語可）
@@ -151,16 +169,19 @@ rm tmp/commit-msg.txt
 PMから「featureブランチをdevへマージ」と指示された場合:
 
 1. featureブランチの変更をコミット済みか確認:
+
    ```bash
    git status
    ```
 
 2. devブランチに切り替え:
+
    ```bash
    git checkout dev
    ```
 
 3. マージ:
+
    ```bash
    git merge feature/bd-{beads-id}
    ```
@@ -176,16 +197,19 @@ PMから「featureブランチをdevへマージ」と指示された場合:
 PMから「featureブランチの変更を破棄」と指示された場合:
 
 1. 現在のブランチを確認:
+
    ```bash
    git branch
    ```
 
 2. devブランチに切り替え:
+
    ```bash
    git checkout dev
    ```
 
 3. featureブランチを削除:
+
    ```bash
    git branch -D feature/bd-{beads-id}
    ```
@@ -197,16 +221,19 @@ PMから「featureブランチの変更を破棄」と指示された場合:
 並列実行のためにWorktreeを使用する場合:
 
 ### Worktree作成
+
 ```bash
 git worktree add .claude/worktrees/{beads-id} -b feature/bd-{beads-id} dev
 ```
 
 ### Worktree一覧確認
+
 ```bash
 git worktree list
 ```
 
 ### Worktree削除（タスク完了後）
+
 ```bash
 git worktree remove .claude/worktrees/{beads-id}
 ```
@@ -216,11 +243,13 @@ git worktree remove .claude/worktrees/{beads-id}
 PMから「プッシュ」と指示された場合:
 
 1. プッシュ先を確認:
+
    ```bash
    git branch
    ```
 
 2. プッシュ実行:
+
    ```bash
    git push origin {branch-name}
    ```
@@ -232,16 +261,19 @@ PMから「プッシュ」と指示された場合:
 PMから「状態確認」と指示された場合:
 
 1. ブランチ一覧:
+
    ```bash
    git branch
    ```
 
 2. 状態:
+
    ```bash
    git status
    ```
 
 3. 最新のログ:
+
    ```bash
    git log --oneline -10
    ```

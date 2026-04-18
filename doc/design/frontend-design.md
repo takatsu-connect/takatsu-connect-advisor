@@ -1,6 +1,7 @@
 # フロントエンド設計書
 
 ## 関連ドキュメント
+
 - [設計概要](./overview.md)
 - [アプリ構成](./app-architecture.md)
 - [API設計](./api-design.md)
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 ```
+
 CSS 変数は `src/styles/tokens.css` を `globals.css` で import する。
 
 ### 2.2 (auth)/layout.tsx
@@ -60,8 +62,10 @@ Server Component。ログイン済みなら `/chat` にリダイレクト。
 ```tsx
 export default async function AuthLayout({ children }) {
   const supabase = supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect('/chat');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) redirect("/chat");
   return <div className={styles.authShell}>{children}</div>;
 }
 ```
@@ -73,8 +77,10 @@ Server Component。未ログインなら `/login` にリダイレクト。
 ```tsx
 export default async function MainLayout({ children }) {
   const supabase = supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
   return (
     <UserContextProvider value={{ id: user.id, email: user.email! }}>
       <div className={styles.mainShell}>{children}</div>
@@ -88,7 +94,9 @@ export default async function MainLayout({ children }) {
 ```tsx
 export default async function ChatPage() {
   const supabase = supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const sessionRow = await getOrCreateLatestSession(supabase, user!.id);
   const messages = await fetchMessages(supabase, sessionRow.id, 50);
@@ -108,11 +116,13 @@ export default async function ChatPage() {
 ### 3.1 `<ChatWindow>` (Client Component)
 
 責務:
+
 - `useChatStream` を使った送受信
 - セッション管理（currentSessionId）
 - エラー表示・再送信
 
 Props:
+
 ```ts
 type ChatWindowProps = {
   initialSessionId: string;
@@ -121,6 +131,7 @@ type ChatWindowProps = {
 ```
 
 Layout:
+
 ```
 ┌───────────────────────────────┐
 │  Header (ユーザー名/ログアウト)  │
@@ -138,19 +149,22 @@ Layout:
 ### 3.2 `<MessageList>`
 
 責務:
+
 - メッセージ配列の描画
 - 自動スクロール（末尾に張り付く、ユーザーが上スクロール中は停止）
 - 新規メッセージのフェードイン
 
 Props:
+
 ```ts
 type MessageListProps = {
   messages: Message[];
-  streamingDelta: string | null;   // Orchestrator が生成中のテキスト
+  streamingDelta: string | null; // Orchestrator が生成中のテキスト
 };
 ```
 
 実装メモ:
+
 - 末尾の assistant メッセージは `streamingDelta` をマージして表示
 - `useEffect` + `scrollTop` で自動スクロール制御
 - 長いセッションでの仮想化は Phase 2 検討（まずは 200件固定）
@@ -158,9 +172,10 @@ type MessageListProps = {
 ### 3.3 `<MessageBubble>`
 
 Props:
+
 ```ts
 type MessageBubbleProps = {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   createdAt?: string;
   traces?: SpecialistTrace[];
@@ -178,9 +193,17 @@ type MessageBubbleProps = {
 
 ```tsx
 <details className={styles.trace}>
-  <summary>{displayName} ({status})</summary>
+  <summary>
+    {displayName} ({status})
+  </summary>
   <p>{summary}</p>
-  <ul>{toolCalls.map(tc => <li key={tc.id}>{tc.tool} ({tc.ms}ms)</li>)}</ul>
+  <ul>
+    {toolCalls.map((tc) => (
+      <li key={tc.id}>
+        {tc.tool} ({tc.ms}ms)
+      </li>
+    ))}
+  </ul>
 </details>
 ```
 
@@ -190,9 +213,14 @@ type MessageBubbleProps = {
 
 ```tsx
 // 入力欄の直上、または画面端の細いライン
-<div className={styles.progress} role="progressbar"
-     aria-valuemin={0} aria-valuemax={limit} aria-valuenow={count}>
-  <div className={styles.progressFill} style={{ width: `${(count/limit)*100}%` }} />
+<div
+  className={styles.progress}
+  role="progressbar"
+  aria-valuemin={0}
+  aria-valuemax={limit}
+  aria-valuenow={count}
+>
+  <div className={styles.progressFill} style={{ width: `${(count / limit) * 100}%` }} />
 </div>
 ```
 
@@ -203,6 +231,7 @@ type MessageBubbleProps = {
 ### 3.6 `<StatusIndicator>`
 
 SSE の `status` / `specialist_start` イベントに応じて「◯◯専門家に相談中...」と表示。
+
 - 進行中は薄いドットアニメーション
 - `done` 受信時に非表示
 
@@ -227,7 +256,9 @@ SSE の `status` / `specialist_start` イベントに応じて「◯◯専門家
     rows={1}
     disabled={isStreaming}
   />
-  <button type="submit" disabled={isStreaming || !text.trim()}>送信</button>
+  <button type="submit" disabled={isStreaming || !text.trim()}>
+    送信
+  </button>
 </form>
 ```
 
@@ -250,26 +281,39 @@ export function useChatStream(initialSessionId: string, initialMessages: Message
     if (isStreaming) return;
     abortRef.current = new AbortController();
     setStreaming(true);
-    setStreamingDelta('');
+    setStreamingDelta("");
     setStatus(null);
     setTraces([]);
     setError(null);
 
     // 楽観的追加
-    const tempUserMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, createdAt: new Date().toISOString() };
-    setMessages(m => [...m, tempUserMsg]);
+    const tempUserMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: text,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((m) => [...m, tempUserMsg]);
 
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: initialSessionId, message: text, clientNonce: tempUserMsg.id }),
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: initialSessionId,
+        message: text,
+        clientNonce: tempUserMsg.id,
+      }),
       signal: abortRef.current.signal,
     });
-    if (!res.ok || !res.body) { setError(new Error('送信に失敗しました')); setStreaming(false); return; }
+    if (!res.ok || !res.body) {
+      setError(new Error("送信に失敗しました"));
+      setStreaming(false);
+      return;
+    }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = '';
+    let buffer = "";
     try {
       while (true) {
         const { value, done } = await reader.read();
@@ -279,17 +323,37 @@ export function useChatStream(initialSessionId: string, initialMessages: Message
         buffer = rest;
         for (const ev of events) {
           switch (ev.event) {
-            case 'status':            setStatus(ev.data.text); break;
-            case 'specialist_start':  setStatus(`${ev.data.displayName}に相談中...`); break;
-            case 'specialist_result': setTraces(t => [...t, ev.data]); break;
-            case 'content':           setStreamingDelta(d => (d ?? '') + ev.data.delta); break;
-            case 'done':              /* 成功時は下で確定 */ break;
-            case 'error':             setError(new Error(ev.data.message)); break;
+            case "status":
+              setStatus(ev.data.text);
+              break;
+            case "specialist_start":
+              setStatus(`${ev.data.displayName}に相談中...`);
+              break;
+            case "specialist_result":
+              setTraces((t) => [...t, ev.data]);
+              break;
+            case "content":
+              setStreamingDelta((d) => (d ?? "") + ev.data.delta);
+              break;
+            case "done":
+              /* 成功時は下で確定 */ break;
+            case "error":
+              setError(new Error(ev.data.message));
+              break;
           }
         }
       }
       // 確定
-      setMessages(m => [...m, { id: crypto.randomUUID(), role: 'assistant', content: streamingDeltaRef.current ?? '', createdAt: new Date().toISOString(), traces }]);
+      setMessages((m) => [
+        ...m,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: streamingDeltaRef.current ?? "",
+          createdAt: new Date().toISOString(),
+          traces,
+        },
+      ]);
     } finally {
       setStreaming(false);
       setStreamingDelta(null);
@@ -297,7 +361,9 @@ export function useChatStream(initialSessionId: string, initialMessages: Message
     }
   }
 
-  function cancel() { abortRef.current?.abort(); }
+  function cancel() {
+    abortRef.current?.abort();
+  }
 
   return { messages, isStreaming, streamingDelta, status, traces, error, sendMessage, cancel };
 }
@@ -310,29 +376,32 @@ export function useChatStream(initialSessionId: string, initialMessages: Message
 ## 5. レスポンシブ方針
 
 ### 5.1 ブレークポイント（詳細は [styling-design.md](./styling-design.md)）
+
 - モバイル: `~ 640px`
 - タブレット: `641px ~ 1024px`
 - デスクトップ: `1025px ~`
 
 ### 5.2 各デバイスでの振る舞い
 
-| 要素 | モバイル | タブレット/PC |
-|---|---|---|
-| `<ChatWindow>` | 全画面（100dvh） | センタリング、最大幅 960px |
-| `<MessageList>` | flex: 1; overflow-y: auto | 同左 |
-| `<MessageBubble>` | `max-width: 88%` | `max-width: 72%` |
-| `<MessageInput>` | 下部固定、safe-area 考慮 | 下部 padded |
-| 送信ボタン | 常時表示 | 入力中のみ高コントラスト |
-| `<ContextProgressBar>` | 入力欄の直上、高さ 2px | 同左、または画面右端 |
-| `<SpecialistTrace>` | 折りたたみ、full-width | インライン、max-width 制限 |
-| タッチ領域 | 44×44px 以上 | 32×32px でも可 |
+| 要素                   | モバイル                  | タブレット/PC              |
+| ---------------------- | ------------------------- | -------------------------- |
+| `<ChatWindow>`         | 全画面（100dvh）          | センタリング、最大幅 960px |
+| `<MessageList>`        | flex: 1; overflow-y: auto | 同左                       |
+| `<MessageBubble>`      | `max-width: 88%`          | `max-width: 72%`           |
+| `<MessageInput>`       | 下部固定、safe-area 考慮  | 下部 padded                |
+| 送信ボタン             | 常時表示                  | 入力中のみ高コントラスト   |
+| `<ContextProgressBar>` | 入力欄の直上、高さ 2px    | 同左、または画面右端       |
+| `<SpecialistTrace>`    | 折りたたみ、full-width    | インライン、max-width 制限 |
+| タッチ領域             | 44×44px 以上              | 32×32px でも可             |
 
 ### 5.3 iOS Safari 対応
+
 - `100vh` ではなく `100dvh` を使う（アドレスバー表示変動対応）
 - 入力欄はキーボード表示時に隠れないよう `position: sticky; bottom: 0` + `env(safe-area-inset-bottom)`
 - IME 変換中の Enter 誤送信防止（上記 `MessageInput` 参照）
 
 ### 5.4 自動スクロールの安全装置
+
 - ユーザーがスクロールを上にずらしたら、ストリーム中でも自動スクロールを停止
 - 停止中は「最新へ戻る」ボタンを表示（右下フローティング）
 
@@ -340,13 +409,13 @@ export function useChatStream(initialSessionId: string, initialMessages: Message
 
 ## 6. エラーハンドリング UI
 
-| シナリオ | UI |
-|---|---|
-| 送信失敗（ネットワーク） | トースト「送信に失敗しました。もう一度お試しください」 |
-| 認証失効 (401) | `/login?error=session_expired` にリダイレクト |
-| SSE 途中切断 | 部分メッセージを保持し、末尾に「応答が途中で切れました」表示 |
-| 全専門家タイムアウト | Orchestrator が「情報取得できませんでした」と応答を返すため専用UIなし |
-| クライアント側 JS エラー | `error.tsx` でリロード案内 |
+| シナリオ                 | UI                                                                    |
+| ------------------------ | --------------------------------------------------------------------- |
+| 送信失敗（ネットワーク） | トースト「送信に失敗しました。もう一度お試しください」                |
+| 認証失効 (401)           | `/login?error=session_expired` にリダイレクト                         |
+| SSE 途中切断             | 部分メッセージを保持し、末尾に「応答が途中で切れました」表示          |
+| 全専門家タイムアウト     | Orchestrator が「情報取得できませんでした」と応答を返すため専用UIなし |
+| クライアント側 JS エラー | `error.tsx` でリロード案内                                            |
 
 `app/(main)/error.tsx` を設置し、汎用エラーページを用意する。
 
@@ -374,13 +443,13 @@ export function useChatStream(initialSessionId: string, initialMessages: Message
 
 ## 9. テスト方針（抜粋、詳細は `.claude/rules/mandatory-testing.md`）
 
-| コンポーネント/フック | テスト手段 |
-|---|---|
-| `MessageBubble` | Jest + RTL（role、Markdown 描画） |
-| `MessageInput` | RTL（IME・Shift+Enter・送信ハンドラ） |
-| `useChatStream` | Jest（fetch モック、ReadableStream モック） |
-| `<ChatWindow>` 全体 | Playwright（実際のSSEパイプラインは BE のモックAPI） |
-| レスポンシブ崩れ | Playwright visual snapshot（モバイル/タブレット/PC） |
+| コンポーネント/フック | テスト手段                                           |
+| --------------------- | ---------------------------------------------------- |
+| `MessageBubble`       | Jest + RTL（role、Markdown 描画）                    |
+| `MessageInput`        | RTL（IME・Shift+Enter・送信ハンドラ）                |
+| `useChatStream`       | Jest（fetch モック、ReadableStream モック）          |
+| `<ChatWindow>` 全体   | Playwright（実際のSSEパイプラインは BE のモックAPI） |
+| レスポンシブ崩れ      | Playwright visual snapshot（モバイル/タブレット/PC） |
 
 ---
 

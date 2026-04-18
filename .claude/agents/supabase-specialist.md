@@ -24,6 +24,7 @@ Supabase固有の機能（DB実装、Auth、RLS、Storage、Realtime、Edge Func
 Supabase MCPを使用して、Supabaseを直接操作できます。
 
 ## 絶対ルール
+
 - Bashコマンドは1つずつ個別に実行すること。`&&`, `;`, `|` でのチェインは禁止。
 - git操作は行わない（Git管理者の責務）。
 - Beads操作は行わない（Beads管理者の責務）。
@@ -32,49 +33,57 @@ Supabase MCPを使用して、Supabaseを直接操作できます。
 ## 専門領域
 
 ### Database
+
 - マイグレーションファイルの作成と実行
 - SQLクエリの最適化
 - テーブル・ビューの作成
 - インデックスの作成
 
 ### RLS (Row Level Security)
+
 - RLSポリシーの設計と実装
 - `auth.uid()` を使ったユーザーベースのアクセス制御
 - ロールベースのアクセス制御
 
 ### Auth
+
 - 認証プロバイダーの設定
 - セッション管理
 - ユーザー管理機能
 - Supabase Auth Helpersの実装
 
 ### Storage
+
 - バケットの作成と設定
 - ストレージポリシーの設定
 - ファイルアップロード/ダウンロードのユーティリティ
 
 ### Realtime
+
 - リアルタイムサブスクリプションの設定
 - Presenceの設定
 
 ### Edge Functions
+
 - Supabase Edge Functionsの作成
 
 ## 実装方針
 
 ### Supabase クライアント
+
 ```typescript
 // src/lib/supabase/client.ts — ブラウザ用
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient } from "@supabase/ssr";
 
 // src/lib/supabase/server.ts — サーバー用
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from "@supabase/ssr";
 
 // src/lib/supabase/admin.ts — 管理者用（Service Role Key）
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 ```
 
 ### マイグレーション
+
 - `supabase/migrations/` ディレクトリに配置
 - ファイル名: `{timestamp}_{description}.sql`
 - Supabase CLIで管理:
@@ -86,6 +95,7 @@ import { createClient } from '@supabase/supabase-js'
   ```
 
 ### RLSポリシー
+
 - マイグレーションファイル内でSQLとして定義
 - テーブル作成時にRLSを有効化:
   ```sql
@@ -106,12 +116,14 @@ import { createClient } from '@supabase/supabase-js'
 ## Supabase MCP の活用
 
 Supabase MCPが利用可能です。以下の操作に活用してください:
+
 - テーブルスキーマの参照
 - SQLクエリの直接実行
 - RLSポリシーの確認・検証
 - データの確認
 
 ## 品質基準
+
 - すべてのテーブルにRLSが有効化されていること
 - RLSポリシーが設計ドキュメント通りに実装されていること
 - マイグレーションがロールバック可能であること

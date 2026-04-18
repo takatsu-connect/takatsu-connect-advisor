@@ -8,15 +8,18 @@
 以下からフレームワークを選択し、不要な方を削除してください。
 
 ### 選択肢A: Next.js（SSR/SSG対応、API Routes同居、SEO重要な場合）
+
 - フレームワーク: Next.js (App Router)
 - デプロイ: Vercel
 
 ### 選択肢B: React + Vite（SPA、管理画面・ダッシュボード、軽量な場合）
+
 - フレームワーク: React + Vite
 - ルーティング: react-router-dom
 - デプロイ: Vercel / Netlify / Cloudflare Pages / その他
 
 ### 共通
+
 - DB/Auth: Supabase
 - タスク管理: Beads
 - テスト: Jest（+ Playwright: E2Eが必要な場合）
@@ -26,6 +29,7 @@
 ## Git戦略
 
 ### ブランチ構成
+
 - `release`: 正式版ブランチ（エージェント操作禁止）
 - `preview`: プレビュー版ブランチ（エージェント操作禁止）
 - `dev`: 開発ブランチ（featureブランチのマージ先）
@@ -33,6 +37,7 @@
 <!-- ブランチ名やルールをプロジェクトに合わせて変更してください -->
 
 ### ルール
+
 - Git Worktreeを使い、並行で進められるタスクは並行で進める
 - featureブランチはBeadsのIDを使って命名する
 - release, previewブランチはエージェントが操作しない
@@ -56,8 +61,8 @@
 - `doc/design/styling-design.md`: デザインシステム、カラー、タイポグラフィ
 - `doc/design/infra-design.md`: デプロイ設定、環境変数、CI/CD
 - `doc/design/security-design.md`: 認証フロー、脆弱性対策方針
-<!-- Supabaseを使わない場合は supabase-design.md を削除してください -->
-<!-- Vercel以外のデプロイ先を使う場合は infra-design.md の説明を変更してください -->
+  <!-- Supabaseを使わない場合は supabase-design.md を削除してください -->
+  <!-- Vercel以外のデプロイ先を使う場合は infra-design.md の説明を変更してください -->
 
 ## プロジェクト固有ルール
 

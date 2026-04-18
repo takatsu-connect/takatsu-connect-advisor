@@ -35,8 +35,8 @@ function checkPackageJsonDependencies(): void {
   }
 
   const deps = {
-    ...(pkg.dependencies as Record<string, string> | undefined ?? {}),
-    ...(pkg.devDependencies as Record<string, string> | undefined ?? {}),
+    ...((pkg.dependencies as Record<string, string> | undefined) ?? {}),
+    ...((pkg.devDependencies as Record<string, string> | undefined) ?? {}),
   };
 
   const requiredDeps = [
@@ -69,7 +69,7 @@ function checkPackageJsonScripts(): void {
     return;
   }
 
-  const scripts = pkg.scripts as Record<string, string> | undefined ?? {};
+  const scripts = (pkg.scripts as Record<string, string> | undefined) ?? {};
   const requiredScripts = ["dev", "build", "start", "lint", "typecheck", "test", "test:e2e"];
 
   for (const script of requiredScripts) {
@@ -91,15 +91,15 @@ function checkTsConfig(): void {
     return;
   }
 
-  const compilerOptions = tsconfig.compilerOptions as Record<string, unknown> | undefined ?? {};
+  const compilerOptions = (tsconfig.compilerOptions as Record<string, unknown> | undefined) ?? {};
 
   if (compilerOptions.strict === true) {
-    pass('tsconfig.json: strict: true');
+    pass("tsconfig.json: strict: true");
   } else {
-    fail('tsconfig.json: strict', true, compilerOptions.strict ?? "not set");
+    fail("tsconfig.json: strict", true, compilerOptions.strict ?? "not set");
   }
 
-  const paths = compilerOptions.paths as Record<string, string[]> | undefined ?? {};
+  const paths = (compilerOptions.paths as Record<string, string[]> | undefined) ?? {};
   const atSlashPaths = paths["@/*"];
   const expectedPaths = ["./src/*"];
 
@@ -147,10 +147,7 @@ function checkNextConfig(): void {
 
 // Check 5: required source files exist
 function checkSourceFiles(): void {
-  const requiredFiles = [
-    "src/app/layout.tsx",
-    "src/app/page.tsx",
-  ];
+  const requiredFiles = ["src/app/layout.tsx", "src/app/page.tsx"];
 
   for (const relPath of requiredFiles) {
     const fullPath = path.join(ROOT, relPath);
@@ -201,6 +198,30 @@ function checkRequiredDirectories(): void {
   }
 }
 
+// Check 7: Prettier config files
+function checkPrettierConfig(): void {
+  const requiredFiles = [".prettierrc", ".prettierignore"];
+  for (const relPath of requiredFiles) {
+    const fullPath = path.join(ROOT, relPath);
+    if (fs.existsSync(fullPath)) {
+      pass(`file exists: ${relPath}`);
+    } else {
+      fail(`file exists: ${relPath}`, relPath, "file not found");
+    }
+  }
+
+  const pkgPath = path.join(ROOT, "package.json");
+  const pkg = readJson(pkgPath);
+  const devDeps = (pkg?.devDependencies as Record<string, string> | undefined) ?? {};
+  for (const dep of ["prettier", "eslint-config-prettier"]) {
+    if (dep in devDeps) {
+      pass(`devDependency: ${dep}`);
+    } else {
+      fail(`devDependency: ${dep}`, dep, "not found");
+    }
+  }
+}
+
 // Run all checks
 checkPackageJsonDependencies();
 checkPackageJsonScripts();
@@ -208,6 +229,7 @@ checkTsConfig();
 checkNextConfig();
 checkSourceFiles();
 checkRequiredDirectories();
+checkPrettierConfig();
 
 // Summary
 if (failures === 0) {
