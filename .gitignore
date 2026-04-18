@@ -40,3 +40,9 @@ next-env.d.ts
 
 # claude worktrees (エージェント作業用一時ディレクトリ)
 .claude/worktrees/
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
