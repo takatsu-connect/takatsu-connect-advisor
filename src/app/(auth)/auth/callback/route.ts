@@ -7,11 +7,14 @@ import { supabaseServer } from "@/lib/db/supabase-server";
  * オープンリダイレクト対策:
  * - 先頭が `/` で始まる相対パスのみ許可
  * - `//` で始まるプロトコル相対URL は外部リダイレクトになるため拒否
+ * - バックスラッシュを含むパスは拒否（Chromium系は `/\` を `//` と解釈するため）
+ * - `javascript:` スキームは拒否
  */
 function sanitizeNextPath(next: string | null): string {
   const defaultPath = "/chat";
   if (!next) return defaultPath;
-  if (next.startsWith("/") && !next.startsWith("//")) {
+  if (next.toLowerCase().startsWith("javascript:")) return defaultPath;
+  if (next.startsWith("/") && !next.startsWith("//") && !next.includes("\\")) {
     return next;
   }
   return defaultPath;
