@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls D:/Public/github/takatsu-connect/takatsu-connect-advisor)",
+      "Bash(ls D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(mkdir D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(mkdir -p D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(rm D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(cp D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(cat D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(node D:/Public/github/takatsu-connect/takatsu-connect-advisor/*)",
+      "Bash(xargs grep *)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(git *)"
+    ]
+  }
+}
