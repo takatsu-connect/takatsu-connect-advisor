@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# tmp (作業用一時ファイル)
+/tmp/
+
+# claude worktrees (エージェント作業用一時ディレクトリ)
+.claude/worktrees/

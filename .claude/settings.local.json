@@ -12,7 +12,9 @@
       "Bash(xargs grep *)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(pnpm *)",
+      "Bash(npm view *)"
     ]
   }
 }
