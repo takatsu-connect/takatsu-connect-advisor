@@ -162,12 +162,52 @@ function checkSourceFiles(): void {
   }
 }
 
+// Check 6: required directories exist (per doc/design/app-architecture.md)
+function checkRequiredDirectories(): void {
+  const requiredDirs = [
+    "src/app/(auth)/login",
+    "src/app/(auth)/auth/callback",
+    "src/app/(main)/chat",
+    "src/app/api/chat",
+    "src/app/api/sessions",
+    "src/app/api/auth/signout",
+    "src/lib/agents",
+    "src/lib/tools",
+    "src/lib/claude",
+    "src/lib/db",
+    "src/components/chat",
+    "src/components/auth",
+    "src/hooks",
+    "src/styles",
+    "src/types",
+    "prompts/agents",
+    "prompts/shared",
+    "prompts/tools",
+    "scripts",
+    "tests/unit",
+    "tests/integration",
+    "tests/e2e",
+    "supabase/migrations",
+    ".github/workflows",
+  ];
+
+  for (const relPath of requiredDirs) {
+    const fullPath = path.join(ROOT, relPath);
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
+      pass(`directory exists: ${relPath}`);
+    } else {
+      fail(`directory exists: ${relPath}`, relPath, "directory not found");
+    }
+  }
+}
+
 // Run all checks
 checkPackageJsonDependencies();
 checkPackageJsonScripts();
 checkTsConfig();
 checkNextConfig();
 checkSourceFiles();
+checkRequiredDirectories();
 
 // Summary
 if (failures === 0) {
