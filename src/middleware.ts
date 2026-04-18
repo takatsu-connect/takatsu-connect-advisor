@@ -64,8 +64,9 @@ export async function middleware(req: NextRequest) {
 /**
  * 認証が必要なパスかどうかを判定する。
  * matcher の設定と一致するパスのうち、/login 以外が保護対象。
+ * テストから直接検証できるよう export する。
  */
-function isProtectedPath(pathname: string): boolean {
+export function isProtectedPath(pathname: string): boolean {
   return (
     pathname.startsWith("/chat") ||
     pathname.startsWith("/api/chat") ||
