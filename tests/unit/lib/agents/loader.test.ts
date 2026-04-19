@@ -304,4 +304,110 @@ describe("loadAgentDefinition (mtime cache)", () => {
     expect(def.maxTokens).toBe(1024);
     expect(def.systemPrompt).toContain("システムプロンプト本文");
   });
+
+  // -------------------------------------------------------------------------
+  // include 統合テスト
+  // -------------------------------------------------------------------------
+
+  test("13. include 付き .md を loadAgentDefinition で読むと expandIncludes が呼ばれ systemPrompt が展開される", async () => {
+    // Arrange:
+    // loader.ts の expandIncludes はデフォルト promptsDir（process.cwd()/prompts）を参照する。
+    // そのため、実際の prompts/shared/ 配下に一時テスト用ファイルを作成し、
+    // テスト後に削除することで実ファイルベースの統合テストを行う。
+
+    const { mkdirSync: mkdirSyncNode, rmSync: rmSyncNode } = await import("fs");
+
+    // process.cwd() はプロジェクトルートを指す
+    const promptsSharedDir = path.join(process.cwd(), "prompts", "shared");
+    mkdirSyncNode(promptsSharedDir, { recursive: true });
+
+    const testSharedFile = path.join(promptsSharedDir, "__test-loader-include.md");
+    const sharedContent = "統合テスト用共有コンテンツ";
+
+    try {
+      writeFileSync(testSharedFile, sharedContent, "utf-8");
+
+      const agentFile = path.join(tmpDir, "include-integration-agent.md");
+      writeFileSync(
+        agentFile,
+        [
+          "---",
+          "name: include-integration-agent",
+          "displayName: include統合テストエージェント",
+          "description: include 統合テスト用エージェント。",
+          "role: specialist",
+          "include:",
+          "  - shared/__test-loader-include.md",
+          "---",
+          "",
+          "本来のシステムプロンプト本文",
+        ].join("\n"),
+        "utf-8"
+      );
+
+      // Act
+      const def = await loadAgentDefinition(agentFile);
+
+      // Assert: shared ファイルの内容が systemPrompt に prepend されている
+      expect(def.systemPrompt).toContain(sharedContent);
+      expect(def.systemPrompt).toContain("本来のシステムプロンプト本文");
+      // 結合形式の区切り "---" も含まれている
+      expect(def.systemPrompt).toContain("---");
+    } finally {
+      rmSyncNode(testSharedFile, { force: true });
+    }
+  });
+
+  test("14. include 付き .md の 2 回目呼び出しはキャッシュヒット（agent ファイル mtime 不変 → shared 変更も再読み込みされない）", async () => {
+    // Arrange
+    const { mkdirSync: mkdirSyncNode, rmSync: rmSyncNode } = await import("fs");
+
+    const promptsSharedDir = path.join(process.cwd(), "prompts", "shared");
+    mkdirSyncNode(promptsSharedDir, { recursive: true });
+
+    const testSharedFile = path.join(promptsSharedDir, "__test-loader-cache.md");
+    const initialSharedContent = "キャッシュテスト用初期コンテンツ";
+
+    try {
+      writeFileSync(testSharedFile, initialSharedContent, "utf-8");
+
+      const agentFile = path.join(tmpDir, "cache-integration-agent.md");
+      writeFileSync(
+        agentFile,
+        [
+          "---",
+          "name: cache-integration-agent",
+          "displayName: キャッシュ統合テストエージェント",
+          "description: キャッシュ動作確認用エージェント。",
+          "role: specialist",
+          "include:",
+          "  - shared/__test-loader-cache.md",
+          "---",
+          "",
+          "エージェント本文",
+        ].join("\n"),
+        "utf-8"
+      );
+
+      // Act: 初回ロード
+      const def1 = await loadAgentDefinition(agentFile);
+      expect(def1.systemPrompt).toContain(initialSharedContent);
+
+      // shared ファイルを更新しても、agent ファイルの mtime は変わらないため
+      // 2回目呼び出しではキャッシュヒット（再読み込みされない）
+      const updatedSharedContent = "更新後のコンテンツ（キャッシュには反映されない）";
+      writeFileSync(testSharedFile, updatedSharedContent, "utf-8");
+
+      // Act: 2回目呼び出し（agent ファイルの mtime 変更なし → キャッシュヒット）
+      const def2 = await loadAgentDefinition(agentFile);
+
+      // Assert: 同じオブジェクト参照（キャッシュから返る）
+      expect(def2).toBe(def1);
+      // 更新された shared コンテンツは反映されない（agent ファイル mtime で管理される仕様）
+      expect(def2.systemPrompt).not.toContain(updatedSharedContent);
+      expect(def2.systemPrompt).toContain(initialSharedContent);
+    } finally {
+      rmSyncNode(testSharedFile, { force: true });
+    }
+  });
 });

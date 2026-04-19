@@ -9,6 +9,7 @@
 
 import "server-only";
 import { stat, readFile } from "node:fs/promises";
+import { expandIncludes } from "./include";
 import { parseAgentDefinition } from "./parser";
 import type { AgentDefinition } from "./types";
 
@@ -67,7 +68,8 @@ export async function loadAgentDefinition(
     );
   }
 
-  const definition = parseAgentDefinition({ filePath, source, mtimeMs: currentMtimeMs });
+  const parsed = parseAgentDefinition({ filePath, source, mtimeMs: currentMtimeMs });
+  const definition = await expandIncludes(parsed);
 
   agentCache.set(filePath, { mtimeMs: currentMtimeMs, definition });
 
