@@ -76,7 +76,7 @@ maxTokens: 1024
 ### 3.2 展開ルール
 
 1. `include` 配列の順序通り、各ファイルの **本文** を連結して **本文の先頭に prepend**
-2. 各 include ファイルは `=== shared/takatsu-connect.md ===` のような見出しで区切る
+2. 各 include ファイルは `<!-- shared/takatsu-connect.md -->` の HTML コメント形式の見出しで区切る
 3. 本文中に `{{include:shared/xxx.md}}` マーカーがあれば、その位置に挿入する（任意機能）
 4. 最終的に `systemPrompt` として1つの文字列にまとめる
 
