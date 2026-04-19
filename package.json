@@ -11,7 +11,8 @@
     "test": "jest",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "validate:setup": "tsx scripts/validate-setup.ts"
+    "validate:setup": "tsx scripts/validate-setup.ts",
+    "validate:agents": "tsx scripts/validate-agents.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
