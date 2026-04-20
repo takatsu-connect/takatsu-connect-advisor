@@ -3,12 +3,14 @@
  *
  * 設計書: doc/design/agent-system-design.md §9.3 ローカル完全一致キャッシュ
  *
- * - SHA-256 ハッシュ文字列をキーとして受け取り、Map で管理する
+ * - SHA-256 ハッシュ文字列をキーとして受け取り、CacheStorage で管理する
  * - キー生成（SHA-256 ハッシュ化）は呼び出し元が実施する（34j.2 の責務）
- * - ファイルベースストレージへの移行は 34j.3 の責務
+ * - ストレージ層は CacheStorage インタフェースで抽象化（34j.3 の責務）
  * - Node.js は単一スレッドのため排他制御は不要
  * - Vercel Serverless は複数インスタンスに分散するためキャッシュは同一インスタンス内のみ有効
  */
+
+import { MapCacheStorage, type CacheStorage } from "./cache-storage";
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -35,19 +37,27 @@ export interface LocalCacheEntry<T> {
  * 2. 環境変数 `LOCAL_CACHE_TTL_SECS`
  * 3. デフォルト値: 30 秒
  *
+ * ストレージ層は `options.storage` で DI 可能。
+ * 未指定の場合は `MapCacheStorage`（インメモリ Map）を使用する。
+ *
  * @template T キャッシュする値の型
  */
 export class LocalCache<T = unknown> {
-  private store_ = new Map<string, LocalCacheEntry<T>>();
+  private readonly storage: CacheStorage<LocalCacheEntry<T>>;
   private readonly ttlMs: number;
 
-  constructor(options?: { ttlSecs?: number }) {
+  constructor(options?: {
+    ttlSecs?: number;
+    /** ストレージ実装の DI。未指定時は MapCacheStorage を使用 */
+    storage?: CacheStorage<LocalCacheEntry<T>>;
+  }) {
     const ttlSecs =
       options?.ttlSecs ??
       Number(process.env.LOCAL_CACHE_TTL_SECS ?? 30);
 
     // NaN や 0 以下の値はデフォルト 30 秒にフォールバック
     this.ttlMs = (Number.isFinite(ttlSecs) && ttlSecs > 0 ? ttlSecs : 30) * 1000;
+    this.storage = options?.storage ?? new MapCacheStorage<LocalCacheEntry<T>>();
   }
 
   /**
@@ -60,10 +70,10 @@ export class LocalCache<T = unknown> {
    * @returns キャッシュヒット時は値、それ以外は `undefined`
    */
   lookup(key: string): T | undefined {
-    const entry = this.store_.get(key);
+    const entry = this.storage.get(key);
     if (!entry) return undefined;
     if (Date.now() >= entry.expiresAt) {
-      this.store_.delete(key);
+      this.storage.delete(key);
       return undefined;
     }
     return entry.value;
@@ -77,7 +87,7 @@ export class LocalCache<T = unknown> {
    * @param value 保存する値
    */
   store(key: string, value: T): void {
-    this.store_.set(key, { value, expiresAt: Date.now() + this.ttlMs });
+    this.storage.set(key, { value, expiresAt: Date.now() + this.ttlMs });
   }
 
   /**
@@ -85,7 +95,7 @@ export class LocalCache<T = unknown> {
    * テスト・デバッグ用途。
    */
   clear(): void {
-    this.store_.clear();
+    this.storage.clear();
   }
 
   /**
@@ -93,7 +103,7 @@ export class LocalCache<T = unknown> {
    * テスト・デバッグ用途。
    */
   size(): number {
-    return this.store_.size;
+    return this.storage.size();
   }
 }
 
