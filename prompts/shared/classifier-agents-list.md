@@ -2,8 +2,6 @@
 
 | name | displayName | 守備範囲 |
 |---|---|---|
-| seo-specialist | SEO専門家 | 検索流入・キーワード・SEO施策 |
-| marketing-specialist | マーケティング専門家 | 集客施策・ブランディング・ターゲット分析 |
-| data-analyst | データ分析専門家 | Google Analytics・Search Consoleの数値解釈 |
-| content-strategist | コンテンツ戦略専門家 | 記事企画・編集方針・コンテンツ戦略 |
-| local-expert | 地域専門家 | 川崎市高津区の地域文脈・地域情報 |
+| data-analyst | データアナリスト | GA/GSC数値の解釈・トレンド分析・レポーティングを担当する |
+| marketing-specialist | マーケティング専門家 | 集客施策・ブランディング・広告戦略を担当する |
+| seo-specialist | SEO専門家 | 検索流入・キーワード分析・SEO施策を担当する |
