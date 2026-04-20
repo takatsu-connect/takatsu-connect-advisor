@@ -12,7 +12,8 @@
  *   - TTL テストでは jest.advanceTimersByTime() で時間を進める
  */
 
-import { LocalCache, localCache } from "@/lib/claude/local-cache";
+import { LocalCache, localCache, type LocalCacheEntry } from "@/lib/claude/local-cache";
+import { MapCacheStorage, type CacheStorage } from "@/lib/claude/cache-storage";
 
 // ---------------------------------------------------------------------------
 // describe: 基本動作
@@ -344,5 +345,94 @@ describe("localCache シングルトン", () => {
 
     // Cleanup
     localCache.clear();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// describe: DI (Dependency Injection) ストレージ
+// ---------------------------------------------------------------------------
+
+describe("LocalCache - DI ストレージ", () => {
+  test("13. DI: カスタム storage を渡すと LocalCache がそれを使う（set/get/delete が委譲される）", () => {
+    // Arrange: モック CacheStorage 実装
+    const mockGet = jest.fn<LocalCacheEntry<string> | undefined, [string]>();
+    const mockSet = jest.fn<void, [string, LocalCacheEntry<string>]>();
+    const mockDelete = jest.fn<boolean, [string]>();
+    const mockClear = jest.fn<void, []>();
+    const mockSize = jest.fn<number, []>().mockReturnValue(0);
+
+    const mockStorage: CacheStorage<LocalCacheEntry<string>> = {
+      get: mockGet,
+      set: mockSet,
+      delete: mockDelete,
+      clear: mockClear,
+      size: mockSize,
+    };
+
+    const cache = new LocalCache<string>({ storage: mockStorage });
+
+    // Act: store → get が呼ばれることを確認
+    cache.store("key", "value");
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet.mock.calls[0][0]).toBe("key");
+    expect(mockSet.mock.calls[0][1].value).toBe("value");
+
+    // Act: lookup → get が呼ばれることを確認
+    // ストアしたエントリを返すようにモックを設定
+    const storedEntry = mockSet.mock.calls[0][1];
+    mockGet.mockReturnValue(storedEntry);
+    const result = cache.lookup("key");
+
+    expect(mockGet).toHaveBeenCalledWith("key");
+    expect(result).toBe("value");
+
+    // Act: clear → clear が呼ばれることを確認
+    cache.clear();
+    expect(mockClear).toHaveBeenCalledTimes(1);
+
+    // Act: size → size が呼ばれることを確認
+    cache.size();
+    expect(mockSize).toHaveBeenCalledTimes(1);
+  });
+
+  test("14. DI: デフォルト時（storage 未指定）でも MapCacheStorage が使われ正常に動作する", () => {
+    // Arrange: storage オプション未指定
+    const cache = new LocalCache<string>();
+
+    // Act
+    cache.store("defaultKey", "defaultValue");
+    const result = cache.lookup("defaultKey");
+
+    // Assert: MapCacheStorage 経由で正常に動作する
+    expect(result).toBe("defaultValue");
+    expect(cache.size()).toBe(1);
+  });
+
+  test("15. DI: 複数の LocalCache がそれぞれ独立した storage を持つ", () => {
+    // Arrange: 2つの独立したキャッシュインスタンスを生成
+    const storageA = new MapCacheStorage<LocalCacheEntry<string>>();
+    const storageB = new MapCacheStorage<LocalCacheEntry<string>>();
+
+    const cacheA = new LocalCache<string>({ storage: storageA });
+    const cacheB = new LocalCache<string>({ storage: storageB });
+
+    // Act: cacheA にのみ保存
+    cacheA.store("sharedKey", "valueA");
+
+    // Assert: cacheB には影響しない
+    expect(cacheA.lookup("sharedKey")).toBe("valueA");
+    expect(cacheB.lookup("sharedKey")).toBeUndefined();
+
+    // Act: cacheB に同一キーで別の値を保存
+    cacheB.store("sharedKey", "valueB");
+
+    // Assert: 互いに独立している
+    expect(cacheA.lookup("sharedKey")).toBe("valueA");
+    expect(cacheB.lookup("sharedKey")).toBe("valueB");
+
+    // Act: cacheA の clear は cacheB に影響しない
+    cacheA.clear();
+    expect(cacheA.lookup("sharedKey")).toBeUndefined();
+    expect(cacheB.lookup("sharedKey")).toBe("valueB");
   });
 });
