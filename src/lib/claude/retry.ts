@@ -1,8 +1,5 @@
-import {
-  APIError,
-  APIConnectionError,
-  APIConnectionTimeoutError,
-} from "@anthropic-ai/sdk";
+import { APIError } from "@anthropic-ai/sdk";
+import { isRetryable } from "./api-error";
 
 export type RetryConfig = {
   maxAttempts: number;
@@ -22,29 +19,6 @@ export const RETRY_CONFIG: RetryConfig = {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function isRetryable(error: unknown): boolean {
-  if (error instanceof APIConnectionTimeoutError) {
-    return true;
-  }
-  if (error instanceof APIConnectionError) {
-    return true;
-  }
-  if (error instanceof APIError) {
-    const status = error.status;
-    if (status === undefined) {
-      return false;
-    }
-    if (status === 429) {
-      return true;
-    }
-    if (status === 500 || status === 502 || status === 503 || status === 504) {
-      return true;
-    }
-    return false;
-  }
-  return false;
 }
 
 function getRetryAfterMs(error: unknown): number | null {
