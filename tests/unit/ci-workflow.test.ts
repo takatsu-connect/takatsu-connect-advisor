@@ -15,8 +15,8 @@ describe("CI workflow", () => {
     content = readFileSync(CI_YML, "utf-8");
   });
 
-  it("triggers on push to dev/preview/release and on pull_request", () => {
-    expect(content).toMatch(/branches:\s*\[dev,\s*preview,\s*release\]/);
+  it("triggers on push to dev/main and on pull_request", () => {
+    expect(content).toMatch(/branches:\s*\[dev,\s*main\]/);
     expect(content).toMatch(/pull_request:/);
   });
 
