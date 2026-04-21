@@ -27,12 +27,7 @@ import { validateAllAgents } from "@/lib/agents/validate";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = path.resolve(__dirname, "../../../../");
-const SHARED_FILE_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "shared",
-  "machino-kikakushitsu.md",
-);
+const SHARED_FILE_PATH = path.join(PROJECT_ROOT, "prompts", "shared", "machino-kikakushitsu.md");
 
 // ---------------------------------------------------------------------------
 // テスト本体
@@ -227,9 +222,7 @@ describe("validateAllAgents による machino-kikakushitsu.md の include 参照
 
     // Assert: machino-kikakushitsu.md に関する include_missing エラーが出ない
     const includeMissingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("machino-kikakushitsu.md"),
+      (e) => e.type === "include_missing" && e.message.includes("machino-kikakushitsu.md"),
     );
     expect(includeMissingErrors).toHaveLength(0);
   });
@@ -243,9 +236,7 @@ describe("validateAllAgents による machino-kikakushitsu.md の include 参照
 
     // Assert: agents_dir_missing が出ず、agentCount が 1 であること
     // （prompts/agents/ に .md ファイルが1件配置されているため）
-    const agentsDirWarning = result.warnings.find(
-      (w) => w.type === "agents_dir_missing",
-    );
+    const agentsDirWarning = result.warnings.find((w) => w.type === "agents_dir_missing");
     expect(agentsDirWarning).toBeUndefined();
     expect(result.agentCount).toBe(1);
   });
@@ -279,17 +270,13 @@ describe("validateAllAgents による machino-kikakushitsu.md の include 参照
     // Assert: does-not-exist.md に関する include_missing エラーが検出される
     // （include 解決ロジックが実際に動作している証拠）
     const missingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("does-not-exist.md"),
+      (e) => e.type === "include_missing" && e.message.includes("does-not-exist.md"),
     );
     expect(missingErrors.length).toBeGreaterThan(0);
 
     // machino-kikakushitsu.md 自体は存在するのでエラーにならない
     const mkMissingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("machino-kikakushitsu.md"),
+      (e) => e.type === "include_missing" && e.message.includes("machino-kikakushitsu.md"),
     );
     expect(mkMissingErrors).toHaveLength(0);
   });

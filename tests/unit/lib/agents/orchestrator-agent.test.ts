@@ -36,17 +36,12 @@ import { validateAllAgents } from "@/lib/agents/validate";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = process.cwd();
-const ORCHESTRATOR_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "agents",
-  "orchestrator.md"
-);
+const ORCHESTRATOR_MD_PATH = path.join(PROJECT_ROOT, "prompts", "agents", "orchestrator.md");
 const ORCHESTRATOR_GUIDELINES_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "shared",
-  "orchestrator-guidelines.md"
+  "orchestrator-guidelines.md",
 );
 
 // ---------------------------------------------------------------------------
@@ -168,8 +163,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-1. systemPrompt に '統合' または '専門家' が含まれる（役割説明）", () => {
     // Assert
-    const hasRoleDescription =
-      systemPrompt.includes("統合") || systemPrompt.includes("専門家");
+    const hasRoleDescription = systemPrompt.includes("統合") || systemPrompt.includes("専門家");
     expect(hasRoleDescription).toBe(true);
   });
 
@@ -185,8 +179,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-4. systemPrompt に '無視' または '上書き' が含まれる（インジェクション対策）", () => {
     // Assert
-    const hasInjectionGuard =
-      systemPrompt.includes("無視") || systemPrompt.includes("上書き");
+    const hasInjectionGuard = systemPrompt.includes("無視") || systemPrompt.includes("上書き");
     expect(hasInjectionGuard).toBe(true);
   });
 });
@@ -211,8 +204,7 @@ describe("loadAgentDefinition() - include 展開確認", () => {
   test("5-1. include 展開後の systemPrompt に orchestrator-guidelines.md の内容（'統合回答ガイドライン' または '矛盾の解消'）が含まれる", () => {
     // Assert
     const hasGuidelinesContent =
-      systemPrompt.includes("統合回答ガイドライン") ||
-      systemPrompt.includes("矛盾の解消");
+      systemPrompt.includes("統合回答ガイドライン") || systemPrompt.includes("矛盾の解消");
     expect(hasGuidelinesContent).toBe(true);
   });
 

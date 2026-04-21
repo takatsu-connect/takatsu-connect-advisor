@@ -40,14 +40,7 @@ function buildDefinition(overrides: Partial<AgentDefinition> = {}): AgentDefinit
 
 /** gray-matter 形式のフロントマター付き shared ファイル内容を生成する */
 function buildSharedFileWithFrontmatter(content: string): string {
-  return [
-    "---",
-    "title: 共有知識",
-    "version: 1",
-    "---",
-    "",
-    content,
-  ].join("\n");
+  return ["---", "title: 共有知識", "version: 1", "---", "", content].join("\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +92,7 @@ describe("expandIncludes", () => {
     writeFileSync(
       path.join(tmpDir, "shared", "knowledge.md"),
       buildSharedFileWithFrontmatter(sharedContent),
-      "utf-8"
+      "utf-8",
     );
 
     const def = buildDefinition({
@@ -120,16 +113,8 @@ describe("expandIncludes", () => {
 
   test("4. 複数の shared ファイルを配列順に連結する", async () => {
     // Arrange
-    writeFileSync(
-      path.join(tmpDir, "shared", "first.md"),
-      "最初の共有内容",
-      "utf-8"
-    );
-    writeFileSync(
-      path.join(tmpDir, "shared", "second.md"),
-      "2番目の共有内容",
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "first.md"), "最初の共有内容", "utf-8");
+    writeFileSync(path.join(tmpDir, "shared", "second.md"), "2番目の共有内容", "utf-8");
 
     const def = buildDefinition({
       include: ["shared/first.md", "shared/second.md"],
@@ -150,11 +135,7 @@ describe("expandIncludes", () => {
   test("5. 結合形式 `<!-- rel -->\\n${content}\\n\\n---\\n\\n${body}` を完全一致で検証", async () => {
     // Arrange
     const sharedContent = "共有コンテンツ本文";
-    writeFileSync(
-      path.join(tmpDir, "shared", "takatsu.md"),
-      sharedContent,
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "takatsu.md"), sharedContent, "utf-8");
 
     const body = "\n本文プロンプト\n";
     const def = buildDefinition({
@@ -168,11 +149,9 @@ describe("expandIncludes", () => {
     // Assert: 結合形式の完全一致
     // 設計書 §3.3: [...included, "---", body].join("\n\n")
     // included は `<!-- shared/takatsu.md -->\n${content}` 形式
-    const expectedSystemPrompt = [
-      `<!-- shared/takatsu.md -->\n${sharedContent}`,
-      "---",
-      body,
-    ].join("\n\n");
+    const expectedSystemPrompt = [`<!-- shared/takatsu.md -->\n${sharedContent}`, "---", body].join(
+      "\n\n",
+    );
 
     expect(result.systemPrompt).toBe(expectedSystemPrompt);
   });
@@ -183,16 +162,12 @@ describe("expandIncludes", () => {
     // マーカーのみの場合はマーカー展開も行われない（実装仕様）。
     // マーカー展開は include 配列に 1 件以上ある場合に実行される。
     const markerContent = "マーカー挿入コンテンツ";
-    writeFileSync(
-      path.join(tmpDir, "shared", "marker.md"),
-      markerContent,
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "marker.md"), markerContent, "utf-8");
     // prepend 用の別ファイルも用意して include 配列を有効にする
     writeFileSync(
       path.join(tmpDir, "shared", "prepend-for-marker-test.md"),
       "prepend 内容",
-      "utf-8"
+      "utf-8",
     );
 
     const def = buildDefinition({
@@ -214,16 +189,8 @@ describe("expandIncludes", () => {
 
   test("7. マーカーと include 配列の両方を同時に処理できる", async () => {
     // Arrange
-    writeFileSync(
-      path.join(tmpDir, "shared", "prepend.md"),
-      "prepend コンテンツ",
-      "utf-8"
-    );
-    writeFileSync(
-      path.join(tmpDir, "shared", "inline.md"),
-      "inline コンテンツ",
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "prepend.md"), "prepend コンテンツ", "utf-8");
+    writeFileSync(path.join(tmpDir, "shared", "inline.md"), "inline コンテンツ", "utf-8");
 
     const def = buildDefinition({
       include: ["shared/prepend.md"],
@@ -263,9 +230,7 @@ describe("expandIncludes", () => {
     });
 
     // Act & Assert
-    await expect(expandIncludes(def, { promptsDir: tmpDir })).rejects.toThrow(
-      'shared/'
-    );
+    await expect(expandIncludes(def, { promptsDir: tmpDir })).rejects.toThrow("shared/");
   });
 
   test("9. path.resolve 後に promptsDir の外に出るパス → throw", async () => {
@@ -308,11 +273,7 @@ describe("expandIncludes", () => {
   test("11. shared ファイルがフロントマター無しの純本文 → そのまま content として読み込める", async () => {
     // Arrange: フロントマターなしのプレーンテキスト
     const plainContent = "フロントマターなしの純粋な本文です。";
-    writeFileSync(
-      path.join(tmpDir, "shared", "plain.md"),
-      plainContent,
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "plain.md"), plainContent, "utf-8");
 
     const def = buildDefinition({
       include: ["shared/plain.md"],
@@ -329,11 +290,7 @@ describe("expandIncludes", () => {
   test("12. shared ファイル内部に include: がフロントマター定義されていても、それは展開しない（1段階のみ）", async () => {
     // Arrange: shared ファイル自体が include フロントマターを持つ
     const nestedSharedContent = "ネストされた共有コンテンツ";
-    writeFileSync(
-      path.join(tmpDir, "shared", "nested-ref.md"),
-      nestedSharedContent,
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "nested-ref.md"), nestedSharedContent, "utf-8");
 
     const sharedWithInclude = [
       "---",
@@ -344,11 +301,7 @@ describe("expandIncludes", () => {
       "shared ファイルの本文（1段階目）",
     ].join("\n");
 
-    writeFileSync(
-      path.join(tmpDir, "shared", "with-include.md"),
-      sharedWithInclude,
-      "utf-8"
-    );
+    writeFileSync(path.join(tmpDir, "shared", "with-include.md"), sharedWithInclude, "utf-8");
 
     const def = buildDefinition({
       include: ["shared/with-include.md"],

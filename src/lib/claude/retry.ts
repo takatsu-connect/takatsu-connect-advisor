@@ -43,11 +43,7 @@ function getRetryAfterMs(error: unknown): number | null {
   return seconds * 1000;
 }
 
-function calcDelayMs(
-  attempt: number,
-  config: RetryConfig,
-  error: unknown,
-): number {
+function calcDelayMs(attempt: number, config: RetryConfig, error: unknown): number {
   const baseDelay = Math.min(
     config.initialDelayMs * Math.pow(config.backoffBase, attempt),
     config.maxDelayMs,

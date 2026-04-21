@@ -38,16 +38,12 @@ const agentCache = new Map<string, CacheEntry>();
  * @param filePath 読み込む .md ファイルのパス（絶対パス・相対パスどちらも可）
  * @throws {Error} ファイルが存在しない場合、またはパースに失敗した場合
  */
-export async function loadAgentDefinition(
-  filePath: string,
-): Promise<AgentDefinition> {
+export async function loadAgentDefinition(filePath: string): Promise<AgentDefinition> {
   let stats: Awaited<ReturnType<typeof stat>>;
   try {
     stats = await stat(filePath);
   } catch {
-    throw new Error(
-      `[loadAgentDefinition] ファイルが見つかりません: ${filePath}`,
-    );
+    throw new Error(`[loadAgentDefinition] ファイルが見つかりません: ${filePath}`);
   }
 
   const currentMtimeMs = stats.mtimeMs;
@@ -63,9 +59,7 @@ export async function loadAgentDefinition(
   try {
     source = await readFile(filePath, "utf-8");
   } catch {
-    throw new Error(
-      `[loadAgentDefinition] ファイルの読み込みに失敗しました: ${filePath}`,
-    );
+    throw new Error(`[loadAgentDefinition] ファイルの読み込みに失敗しました: ${filePath}`);
   }
 
   const parsed = parseAgentDefinition({ filePath, source, mtimeMs: currentMtimeMs });

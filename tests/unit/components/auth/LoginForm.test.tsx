@@ -105,7 +105,7 @@ describe("LoginForm", () => {
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "メールアドレスを入力してください。"
+        "メールアドレスを入力してください。",
       );
       expect(mockSignInWithPassword).not.toHaveBeenCalled();
     });
@@ -118,7 +118,7 @@ describe("LoginForm", () => {
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "有効なメールアドレスを入力してください。"
+        "有効なメールアドレスを入力してください。",
       );
       expect(mockSignInWithPassword).not.toHaveBeenCalled();
     });
@@ -130,9 +130,7 @@ describe("LoginForm", () => {
       await user.type(screen.getByLabelText("メールアドレス"), "test@example.com");
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "パスワードを入力してください。"
-      );
+      expect(await screen.findByRole("alert")).toHaveTextContent("パスワードを入力してください。");
       expect(mockSignInWithPassword).not.toHaveBeenCalled();
     });
   });
@@ -193,7 +191,7 @@ describe("LoginForm", () => {
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "メールアドレスまたはパスワードが正しくありません。"
+        "メールアドレスまたはパスワードが正しくありません。",
       );
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -215,7 +213,7 @@ describe("LoginForm", () => {
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "メールアドレスの確認が完了していません。招待メールをご確認ください。"
+        "メールアドレスの確認が完了していません。招待メールをご確認ください。",
       );
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -237,7 +235,7 @@ describe("LoginForm", () => {
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "ログインに失敗しました。しばらく経ってから再度お試しください。"
+        "ログインに失敗しました。しばらく経ってから再度お試しください。",
       );
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -257,7 +255,7 @@ describe("LoginForm", () => {
       await user.click(screen.getByRole("button", { name: "ログイン" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "ログインに失敗しました。しばらく経ってから再度お試しください。"
+        "ログインに失敗しました。しばらく経ってから再度お試しください。",
       );
       // isLoading が false に戻りボタンが再度有効になっていること
       await waitFor(() => {

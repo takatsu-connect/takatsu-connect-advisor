@@ -131,7 +131,7 @@ describe("GET /auth/callback", () => {
       expect(getRedirectSearchParams(res)?.get("error")).toBe("exchange_failed");
       expect(consoleSpy).toHaveBeenCalledWith(
         "[auth/callback] exchangeCodeForSession failed:",
-        "invalid grant"
+        "invalid grant",
       );
 
       consoleSpy.mockRestore();

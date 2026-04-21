@@ -43,7 +43,12 @@ function buildAgentMd(opts: {
     body = "\nあなたは専門家です。\n",
   } = opts;
 
-  const lines: string[] = ["---", `name: ${name}`, `displayName: ${displayName}`, `description: ${description}`];
+  const lines: string[] = [
+    "---",
+    `name: ${name}`,
+    `displayName: ${displayName}`,
+    `description: ${description}`,
+  ];
   if (role) lines.push(`role: ${role}`);
   if (tools && tools.length > 0) {
     lines.push("tools:");
@@ -133,7 +138,7 @@ describe("validateAllAgents", () => {
           tools: ["fetch-webpage"],
           include: ["shared/common.md"],
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -160,11 +165,7 @@ describe("validateAllAgents", () => {
 
     test("3. include/tools 無し: agent.md に include も tools も無い → errors 0", async () => {
       // Arrange
-      writeFileSync(
-        path.join(agentsDir, "minimal.md"),
-        buildAgentMd({ name: "minimal" }),
-        "utf-8"
-      );
+      writeFileSync(path.join(agentsDir, "minimal.md"), buildAgentMd({ name: "minimal" }), "utf-8");
 
       // Act
       const result = await validateAllAgents({ promptsDir, toolsDir });
@@ -208,7 +209,7 @@ describe("validateAllAgents", () => {
           name: "agent-with-missing-include",
           include: ["shared/non-existent.md"],
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -230,7 +231,7 @@ describe("validateAllAgents", () => {
           name: "agent-with-unknown-tool",
           tools: ["unknown-tool"],
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -248,12 +249,12 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "classifier-1.md"),
         buildAgentMd({ name: "classifier-one", role: "classifier" }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "classifier-2.md"),
         buildAgentMd({ name: "classifier-two", role: "classifier" }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -271,12 +272,12 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "orchestrator-1.md"),
         buildAgentMd({ name: "orchestrator-one", role: "orchestrator" }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "orchestrator-2.md"),
         buildAgentMd({ name: "orchestrator-two", role: "orchestrator" }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -294,12 +295,12 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "agent-a.md"),
         buildAgentMd({ name: "duplicate-name" }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "agent-b.md"),
         buildAgentMd({ name: "duplicate-name" }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -317,7 +318,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(sharedDir, "self-ref.md"),
         buildSharedMd({ include: ["shared/self-ref.md"] }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "agent.md"),
@@ -325,7 +326,7 @@ describe("validateAllAgents", () => {
           name: "agent-with-cycle",
           include: ["shared/self-ref.md"],
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -345,12 +346,12 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(sharedDir, "node-a.md"),
         buildSharedMd({ include: ["shared/node-b.md"] }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(sharedDir, "node-b.md"),
         buildSharedMd({ include: ["shared/node-a.md"] }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "agent.md"),
@@ -358,7 +359,7 @@ describe("validateAllAgents", () => {
           name: "agent-with-multi-cycle",
           include: ["shared/node-a.md"],
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -382,23 +383,23 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(sharedDir, "common-a.md"),
         buildSharedMd({ include: ["shared/common-b.md"] }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(sharedDir, "common-b.md"),
         buildSharedMd({ include: ["shared/common-a.md"] }),
-        "utf-8"
+        "utf-8",
       );
       // 2 つの agent が同じ循環する共有ファイルを include する
       writeFileSync(
         path.join(agentsDir, "entry1.md"),
         buildAgentMd({ name: "entry-one", include: ["shared/common-a.md"] }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "entry2.md"),
         buildAgentMd({ name: "entry-two", include: ["shared/common-a.md"] }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -416,7 +417,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "schema-invalid.md"),
         ["---", "displayName: 名前なし", "description: 説明", "---", "\n本文\n"].join("\n"),
-        "utf-8"
+        "utf-8",
       );
 
       // include 不在
@@ -426,20 +427,12 @@ describe("validateAllAgents", () => {
           name: "agent-missing-inc",
           include: ["shared/does-not-exist.md"],
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // name 重複（2 ファイル）
-      writeFileSync(
-        path.join(agentsDir, "dup-a.md"),
-        buildAgentMd({ name: "dup-name" }),
-        "utf-8"
-      );
-      writeFileSync(
-        path.join(agentsDir, "dup-b.md"),
-        buildAgentMd({ name: "dup-name" }),
-        "utf-8"
-      );
+      writeFileSync(path.join(agentsDir, "dup-a.md"), buildAgentMd({ name: "dup-name" }), "utf-8");
+      writeFileSync(path.join(agentsDir, "dup-b.md"), buildAgentMd({ name: "dup-name" }), "utf-8");
 
       // Act
       const result = await validateAllAgents({ promptsDir, toolsDir });
@@ -465,7 +458,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "large-prompt.md"),
         buildAgentMd({ name: "large-prompt-agent", body: longBody }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -507,16 +500,13 @@ describe("validateAllAgents", () => {
           description: "SEO担当。",
           role: "specialist",
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // shared/classifier-agents-list.md に古い（差分がある）内容を書く
-      const outdatedContent = "# 利用可能な専門家一覧\n\n| name | displayName | 守備範囲 |\n|---|---|---|\n| old-agent | 旧エージェント | 旧担当 |\n";
-      writeFileSync(
-        path.join(sharedDir, "classifier-agents-list.md"),
-        outdatedContent,
-        "utf-8"
-      );
+      const outdatedContent =
+        "# 利用可能な専門家一覧\n\n| name | displayName | 守備範囲 |\n|---|---|---|\n| old-agent | 旧エージェント | 旧担当 |\n";
+      writeFileSync(path.join(sharedDir, "classifier-agents-list.md"), outdatedContent, "utf-8");
 
       // Act
       const result = await validateAllAgents({ promptsDir, toolsDir });
@@ -537,16 +527,12 @@ describe("validateAllAgents", () => {
           description: "SEO担当。",
           role: "specialist",
         }),
-        "utf-8"
+        "utf-8",
       );
 
       // validate.ts の generateClassifierAgentsList と同じ形式で最新の内容を作成
       const currentContent = `# 利用可能な専門家一覧\n\n| name | displayName | 守備範囲 |\n|---|---|---|\n| seo-specialist | SEO専門家 | SEO担当。 |\n`;
-      writeFileSync(
-        path.join(sharedDir, "classifier-agents-list.md"),
-        currentContent,
-        "utf-8"
-      );
+      writeFileSync(path.join(sharedDir, "classifier-agents-list.md"), currentContent, "utf-8");
 
       // Act
       const result = await validateAllAgents({ promptsDir, toolsDir });
@@ -563,7 +549,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "agent.md"),
         buildAgentMd({ name: "tool-user", tools: ["my-tool"] }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -581,7 +567,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "agent.md"),
         buildAgentMd({ name: "toolless-agent", tools: ["some-tool"] }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act: toolsDir を渡さず、tools ディレクトリが存在しない状態
@@ -602,17 +588,17 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "classifier.md"),
         buildAgentMd({ name: "the-classifier", role: "classifier" }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "orchestrator.md"),
         buildAgentMd({ name: "the-orchestrator", role: "orchestrator" }),
-        "utf-8"
+        "utf-8",
       );
       writeFileSync(
         path.join(agentsDir, "specialist.md"),
         buildAgentMd({ name: "the-specialist", role: "specialist" }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -632,7 +618,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "boundary.md"),
         buildAgentMd({ name: "boundary-agent", body }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -666,7 +652,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "agent.md"),
         buildAgentMd({ name: "custom-tool-user", tools: ["custom-tool"] }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -688,7 +674,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "struct-agent.md"),
         buildAgentMd({ name: "struct-agent" }),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -705,7 +691,7 @@ describe("validateAllAgents", () => {
       writeFileSync(
         path.join(agentsDir, "bad.md"),
         ["---", "displayName: 不正", "description: 説明", "---", "\n本文\n"].join("\n"),
-        "utf-8"
+        "utf-8",
       );
 
       // Act

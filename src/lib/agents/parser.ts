@@ -23,11 +23,9 @@ import type { AgentDefinition } from "./types";
  */
 const frontmatterSchema = z.object({
   /** エージェント識別子。^[a-z0-9-]+$ 形式 */
-  name: z
-    .string()
-    .regex(/^[a-z0-9-]+$/, {
-      message: "name は小文字英数字とハイフンのみ使用できます（例: seo-specialist）",
-    }),
+  name: z.string().regex(/^[a-z0-9-]+$/, {
+    message: "name は小文字英数字とハイフンのみ使用できます（例: seo-specialist）",
+  }),
   /** UI / トレース表示用の日本語名 */
   displayName: z.string().min(1, { message: "displayName は必須です" }),
   /** カード表示・トレース用の説明文 */
@@ -36,9 +34,7 @@ const frontmatterSchema = z.object({
    * エージェントの役割。
    * 未指定時は "specialist" をデフォルト値とする。
    */
-  role: z
-    .enum(["classifier", "orchestrator", "specialist"])
-    .default("specialist"),
+  role: z.enum(["classifier", "orchestrator", "specialist"]).default("specialist"),
   /**
    * 使用モデル（例: "claude-haiku-4-5"）。
    * 未指定時はローダーが role ごとの環境変数で解決する。
@@ -106,9 +102,7 @@ export interface ParseAgentDefinitionOptions {
  * // def.systemPrompt => "\nあなたは地域メディアのSEO専門家です。\n"
  * ```
  */
-export function parseAgentDefinition(
-  options: ParseAgentDefinitionOptions,
-): AgentDefinition {
+export function parseAgentDefinition(options: ParseAgentDefinitionOptions): AgentDefinition {
   const { filePath, source, mtimeMs } = options;
 
   // gray-matter でフロントマターと本文を分離

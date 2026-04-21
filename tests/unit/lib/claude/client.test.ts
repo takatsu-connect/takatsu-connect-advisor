@@ -110,7 +110,9 @@ describe("anthropic - APIキー取得源の検証", () => {
     await import("@/lib/claude/client");
 
     // Assert: 指定したキーがそのままコンストラクタに渡される
-    const callArg = (MockAnthropicConstructor.mock.calls as unknown as Array<[{ apiKey: string }]>)[0][0];
+    const callArg = (
+      MockAnthropicConstructor.mock.calls as unknown as Array<[{ apiKey: string }]>
+    )[0][0];
     expect(callArg.apiKey).toBe(specificKey);
   });
 });
@@ -163,8 +165,6 @@ describe("anthropic - 環境変数エラーの波及", () => {
     jest.mock("@/lib/env", () => ({ getEnv: mockGetEnv }));
 
     // Act & Assert: モジュールロード時に同じエラーが伝播する
-    await expect(import("@/lib/claude/client")).rejects.toThrow(
-      "Invalid environment variables:"
-    );
+    await expect(import("@/lib/claude/client")).rejects.toThrow("Invalid environment variables:");
   });
 });

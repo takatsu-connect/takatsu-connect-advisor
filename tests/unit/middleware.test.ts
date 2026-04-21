@@ -107,16 +107,20 @@ describe("middleware", () => {
       mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     });
 
-    it.each(["/chat", "/chat/new", "/api/chat", "/api/chat/foo", "/api/sessions", "/api/sessions/abc"])(
-      "%s → /login にリダイレクトされること",
-      async (pathname) => {
-        const req = makeRequest(pathname);
-        const res = await middleware(req);
+    it.each([
+      "/chat",
+      "/chat/new",
+      "/api/chat",
+      "/api/chat/foo",
+      "/api/sessions",
+      "/api/sessions/abc",
+    ])("%s → /login にリダイレクトされること", async (pathname) => {
+      const req = makeRequest(pathname);
+      const res = await middleware(req);
 
-        expect(res.status).toBe(307);
-        expect(getRedirectPathname(res)).toBe("/login");
-      }
-    );
+      expect(res.status).toBe(307);
+      expect(getRedirectPathname(res)).toBe("/login");
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -175,7 +179,7 @@ describe("middleware", () => {
         const res = await middleware(req);
 
         expect(res.headers.get("location")).toBeNull();
-      }
+      },
     );
   });
 
@@ -192,7 +196,7 @@ describe("middleware", () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(
         "[middleware] supabase auth error",
-        expect.any(Error)
+        expect.any(Error),
       );
       expect(res.status).toBe(307);
       expect(getRedirectPathname(res)).toBe("/login");
@@ -218,14 +222,30 @@ describe("middleware", () => {
       };
 
       createServerClient.mockImplementationOnce(
-        (_url: string, _key: string, options: { cookies: { setAll: (cookies: Array<{ name: string; value: string; options?: object }>) => void } }) => {
+        (
+          _url: string,
+          _key: string,
+          options: {
+            cookies: {
+              setAll: (cookies: Array<{ name: string; value: string; options?: object }>) => void;
+            };
+          },
+        ) => {
           // コンストラクト時に Cookie をセット（トークンリフレッシュを模倣）
           options.cookies.setAll([
-            { name: "sb-access-token", value: "refreshed-token-abc", options: { path: "/", httpOnly: true } },
-            { name: "sb-refresh-token", value: "refresh-token-xyz", options: { path: "/", httpOnly: true } },
+            {
+              name: "sb-access-token",
+              value: "refreshed-token-abc",
+              options: { path: "/", httpOnly: true },
+            },
+            {
+              name: "sb-refresh-token",
+              value: "refresh-token-xyz",
+              options: { path: "/", httpOnly: true },
+            },
           ]);
           return { auth: { getUser: mockGetUser } };
-        }
+        },
       );
 
       const req = makeRequest("/chat");
@@ -252,12 +272,20 @@ describe("middleware", () => {
       };
 
       createServerClient.mockImplementationOnce(
-        (_url: string, _key: string, options: { cookies: { setAll: (cookies: Array<{ name: string; value: string; options?: object }>) => void } }) => {
+        (
+          _url: string,
+          _key: string,
+          options: {
+            cookies: {
+              setAll: (cookies: Array<{ name: string; value: string; options?: object }>) => void;
+            };
+          },
+        ) => {
           options.cookies.setAll([
             { name: "sb-access-token", value: "new-access-token", options: { path: "/" } },
           ]);
           return { auth: { getUser: mockGetUser } };
-        }
+        },
       );
 
       const req = makeRequest("/login");
@@ -280,12 +308,20 @@ describe("middleware", () => {
       };
 
       createServerClient.mockImplementationOnce(
-        (_url: string, _key: string, options: { cookies: { setAll: (cookies: Array<{ name: string; value: string; options?: object }>) => void } }) => {
+        (
+          _url: string,
+          _key: string,
+          options: {
+            cookies: {
+              setAll: (cookies: Array<{ name: string; value: string; options?: object }>) => void;
+            };
+          },
+        ) => {
           options.cookies.setAll([
             { name: "sb-access-token", value: "partial-token", options: { path: "/" } },
           ]);
           return { auth: { getUser: mockGetUser } };
-        }
+        },
       );
 
       const req = makeRequest("/chat");

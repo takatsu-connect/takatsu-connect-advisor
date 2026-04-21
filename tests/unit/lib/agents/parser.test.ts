@@ -93,10 +93,7 @@ describe("parseAgentDefinition - 正常系", () => {
     // Assert
     expect(def.model).toBe("claude-haiku-4-5");
     expect(def.tools).toEqual(["fetch_webpage", "query_search_console"]);
-    expect(def.include).toEqual([
-      "shared/takatsu-connect.md",
-      "shared/guidelines.md",
-    ]);
+    expect(def.include).toEqual(["shared/takatsu-connect.md", "shared/guidelines.md"]);
     expect(def.temperature).toBe(0.4);
     expect(def.maxTokens).toBe(1024);
   });
@@ -256,7 +253,7 @@ describe("parseAgentDefinition - 異常系", () => {
     ).toThrow(defaultFilePath);
   });
 
-  test("8. role が union 外の値（\"admin\"）の場合にエラーが throw される", () => {
+  test('8. role が union 外の値（"admin"）の場合にエラーが throw される', () => {
     // Arrange
     const source = buildSource({ ...minimalFrontmatter, role: "admin" });
 
@@ -270,7 +267,7 @@ describe("parseAgentDefinition - 異常系", () => {
     ).toThrow();
   });
 
-  test("9. temperature が number でない（文字列 \"0.5\"）場合にエラーが throw される", () => {
+  test('9. temperature が number でない（文字列 "0.5"）場合にエラーが throw される', () => {
     // Arrange: YAML 内で引用符ありの文字列として渡す
     const source = [
       "---",

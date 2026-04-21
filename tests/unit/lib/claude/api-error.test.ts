@@ -148,19 +148,16 @@ describe("classifyApiError", () => {
     expect(kind).toBe("server_error");
   });
 
-  test.each([502, 503, 504])(
-    '1-7. InternalServerError (status=%i) → "server_error"',
-    (status) => {
-      // Arrange
-      const error = makeInternalServerError(status);
+  test.each([502, 503, 504])('1-7. InternalServerError (status=%i) → "server_error"', (status) => {
+    // Arrange
+    const error = makeInternalServerError(status);
 
-      // Act
-      const kind = classifyApiError(error);
+    // Act
+    const kind = classifyApiError(error);
 
-      // Assert
-      expect(kind).toBe("server_error");
-    },
-  );
+    // Assert
+    expect(kind).toBe("server_error");
+  });
 
   test('1-8. APIConnectionError → "connection"', () => {
     // Arrange
@@ -211,16 +208,13 @@ describe("isRetryable", () => {
     ["InternalServerError (504)", makeInternalServerError(504)],
     ["APIConnectionError", makeAPIConnectionError()],
     ["APIConnectionTimeoutError", makeAPIConnectionTimeoutError()],
-  ] as const)(
-    "2-1. %s → true (リトライ対象)",
-    (_label, error) => {
-      // Act
-      const result = isRetryable(error);
+  ] as const)("2-1. %s → true (リトライ対象)", (_label, error) => {
+    // Act
+    const result = isRetryable(error);
 
-      // Assert
-      expect(result).toBe(true);
-    },
-  );
+    // Assert
+    expect(result).toBe(true);
+  });
 
   test.each([
     ["AuthenticationError (401)", makeAuthenticationError()],
@@ -228,16 +222,13 @@ describe("isRetryable", () => {
     ["BadRequestError (413)", makePayloadTooLargeError()],
     ["BadRequestError (400)", makeBadRequestError()],
     ["非 APIError (Error)", new Error("generic")],
-  ] as const)(
-    "2-2. %s → false (リトライ不可)",
-    (_label, error) => {
-      // Act
-      const result = isRetryable(error);
+  ] as const)("2-2. %s → false (リトライ不可)", (_label, error) => {
+    // Act
+    const result = isRetryable(error);
 
-      // Assert
-      expect(result).toBe(false);
-    },
-  );
+    // Assert
+    expect(result).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -271,16 +262,13 @@ describe("isAuthError", () => {
     ["RateLimitError (429)", makeRateLimitError()],
     ["InternalServerError (500)", makeInternalServerError(500)],
     ["非 APIError (Error)", new Error("other")],
-  ] as const)(
-    "3-3. %s → false",
-    (_label, error) => {
-      // Act
-      const result = isAuthError(error);
+  ] as const)("3-3. %s → false", (_label, error) => {
+    // Act
+    const result = isAuthError(error);
 
-      // Assert
-      expect(result).toBe(false);
-    },
-  );
+    // Assert
+    expect(result).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -303,14 +291,11 @@ describe("isPayloadTooLargeError", () => {
     ["BadRequestError (400)", makeBadRequestError()],
     ["AuthenticationError (401)", makeAuthenticationError()],
     ["RateLimitError (429)", makeRateLimitError()],
-  ] as const)(
-    "4-2. %s → false",
-    (_label, error) => {
-      // Act
-      const result = isPayloadTooLargeError(error);
+  ] as const)("4-2. %s → false", (_label, error) => {
+    // Act
+    const result = isPayloadTooLargeError(error);
 
-      // Assert
-      expect(result).toBe(false);
-    },
-  );
+    // Assert
+    expect(result).toBe(false);
+  });
 });

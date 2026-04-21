@@ -38,11 +38,7 @@ export interface ValidationError {
 
 export interface ValidationWarning {
   /** 警告の種類 */
-  type:
-    | "tools_dir_missing"
-    | "agents_dir_missing"
-    | "classifier_list_diff"
-    | "prompt_size";
+  type: "tools_dir_missing" | "agents_dir_missing" | "classifier_list_diff" | "prompt_size";
   /** 警告メッセージ */
   message: string;
 }
@@ -97,18 +93,14 @@ async function fileExists(filePath: string): Promise<boolean> {
  */
 async function listMdFiles(dirPath: string): Promise<string[]> {
   const entries = await readdir(dirPath);
-  return entries
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => path.join(dirPath, f));
+  return entries.filter((f) => f.endsWith(".md")).map((f) => path.join(dirPath, f));
 }
 
 /**
  * src/lib/tools/schemas.ts から ツール名一覧を抽出する。
  * import が難しい環境（tsx 経由 CLI）でもテキスト解析で取得できるようにする。
  */
-async function loadToolNamesFromSchemas(
-  schemasPath: string,
-): Promise<Set<string> | null> {
+async function loadToolNamesFromSchemas(schemasPath: string): Promise<Set<string> | null> {
   let source: string;
   try {
     source = await readFile(schemasPath, "utf-8");
@@ -157,9 +149,7 @@ async function extractSharedIncludes(filePath: string): Promise<string[]> {
  * @param graph - ノード（相対パス）→ 参照先ノード配列のマップ
  * @returns 循環が検出された場合の ValidationError 配列
  */
-function detectIncludeCycles(
-  graph: Map<string, string[]>,
-): ValidationError[] {
+function detectIncludeCycles(graph: Map<string, string[]>): ValidationError[] {
   const cycleErrors: ValidationError[] = [];
   const visitedGlobal = new Set<string>();
 
@@ -171,11 +161,7 @@ function detectIncludeCycles(
    * @param onStack スタック上にいるノードの集合（O(1) ループ検出用）
    * @returns ループを検出した場合 true
    */
-  function dfs(
-    node: string,
-    stack: string[],
-    onStack: Set<string>,
-  ): boolean {
+  function dfs(node: string, stack: string[], onStack: Set<string>): boolean {
     if (onStack.has(node)) {
       // 循環発見 — スタックから循環経路を抽出する
       const cycleStart = stack.indexOf(node);
@@ -306,9 +292,7 @@ export async function validateAllAgents(
   } else if (toolsDirExists) {
     // prompts/tools/*.md のファイル名（拡張子除き）をツール名として扱う
     const toolMdFiles = await listMdFiles(toolsDir);
-    knownToolNames = new Set(
-      toolMdFiles.map((f) => path.basename(f, ".md")),
-    );
+    knownToolNames = new Set(toolMdFiles.map((f) => path.basename(f, ".md")));
   } else {
     warnings.push({
       type: "tools_dir_missing",
@@ -458,7 +442,10 @@ export async function validateAllAgents(
         const relShared = path.relative(promptsDir, sharedFilePath).replace(/\\/g, "/");
         if (!includeGraph.has(relShared)) {
           const deps = await extractSharedIncludes(sharedFilePath);
-          includeGraph.set(relShared, deps.map((r) => r.replace(/\\/g, "/")));
+          includeGraph.set(
+            relShared,
+            deps.map((r) => r.replace(/\\/g, "/")),
+          );
         }
       }
     }
@@ -471,10 +458,7 @@ export async function validateAllAgents(
 
   // 7. classifier-agents-list.md の diff 確認
   if (sharedExists && loadedAgents.length > 0) {
-    const classifierListPath = path.join(
-      sharedDir,
-      "classifier-agents-list.md",
-    );
+    const classifierListPath = path.join(sharedDir, "classifier-agents-list.md");
     const classifierListExists = await fileExists(classifierListPath);
 
     if (classifierListExists) {

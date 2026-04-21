@@ -154,7 +154,7 @@ describe("POST /api/auth/signout", () => {
       expect(getRedirectPathname(res)).toBe("/login");
       expect(consoleSpy).toHaveBeenCalledWith(
         "[auth/signout] signOut failed:",
-        "signOut service error"
+        "signOut service error",
       );
 
       consoleSpy.mockRestore();
@@ -182,7 +182,7 @@ describe("POST /api/auth/signout", () => {
       expect(getRedirectPathname(res)).toBe("/login");
       expect(consoleSpy).toHaveBeenCalledWith(
         "[auth/signout] unexpected error:",
-        expect.any(Error)
+        expect.any(Error),
       );
 
       consoleSpy.mockRestore();
@@ -200,7 +200,7 @@ describe("POST /api/auth/signout", () => {
     });
 
     it("GET がエクスポートされていないこと", async () => {
-      const mod = await import("@/app/api/auth/signout/route") as Record<string, unknown>;
+      const mod = (await import("@/app/api/auth/signout/route")) as Record<string, unknown>;
       expect(mod.GET).toBeUndefined();
     });
 

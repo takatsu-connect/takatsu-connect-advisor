@@ -29,12 +29,7 @@ import { validateAllAgents } from "@/lib/agents/validate";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = path.resolve(__dirname, "../../../../");
-const SHARED_FILE_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "shared",
-  "style-guide.md",
-);
+const SHARED_FILE_PATH = path.join(PROJECT_ROOT, "prompts", "shared", "style-guide.md");
 
 // ---------------------------------------------------------------------------
 // テスト本体
@@ -140,7 +135,10 @@ describe("prompts/shared/style-guide.md", () => {
       // CTR・CVR等のKPI具体数値は動的データのため共通知識に含めない。
       const lines = content.replace(/\r\n/g, "\n").split("\n");
       const filteredContent = lines
-        .filter((line) => !line.includes("1,200セッション") && !line.includes("10%") && !line.includes("3件"))
+        .filter(
+          (line) =>
+            !line.includes("1,200セッション") && !line.includes("10%") && !line.includes("3件"),
+        )
         .join("\n");
       const kpiPercentPattern = /\d+(\.\d+)?%/;
       expect(kpiPercentPattern.test(filteredContent)).toBe(false);
@@ -158,7 +156,10 @@ describe("prompts/shared/style-guide.md", () => {
       // 記事数等の動的な件数は共通知識に含めない。
       const lines = content.replace(/\r\n/g, "\n").split("\n");
       const filteredContent = lines
-        .filter((line) => !line.includes("1,200セッション") && !line.includes("10%") && !line.includes("3件"))
+        .filter(
+          (line) =>
+            !line.includes("1,200セッション") && !line.includes("10%") && !line.includes("3件"),
+        )
         .join("\n");
       const countPattern = /\d+件/;
       expect(countPattern.test(filteredContent)).toBe(false);
@@ -241,9 +242,7 @@ describe("validateAllAgents による style-guide.md の include 参照整合性
 
     // Assert: style-guide.md に関する include_missing エラーが出ない
     const includeMissingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("style-guide.md"),
+      (e) => e.type === "include_missing" && e.message.includes("style-guide.md"),
     );
     expect(includeMissingErrors).toHaveLength(0);
   });
@@ -257,9 +256,7 @@ describe("validateAllAgents による style-guide.md の include 参照整合性
 
     // Assert: agents_dir_missing が出ず、agentCount が 1 であること
     // （prompts/agents/ に .md ファイルが1件配置されているため）
-    const agentsDirWarning = result.warnings.find(
-      (w) => w.type === "agents_dir_missing",
-    );
+    const agentsDirWarning = result.warnings.find((w) => w.type === "agents_dir_missing");
     expect(agentsDirWarning).toBeUndefined();
     expect(result.agentCount).toBe(1);
   });
@@ -293,17 +290,13 @@ describe("validateAllAgents による style-guide.md の include 参照整合性
     // Assert: does-not-exist.md に関する include_missing エラーが検出される
     // （include 解決ロジックが実際に動作している証拠）
     const missingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("does-not-exist.md"),
+      (e) => e.type === "include_missing" && e.message.includes("does-not-exist.md"),
     );
     expect(missingErrors.length).toBeGreaterThan(0);
 
     // style-guide.md 自体は存在するのでエラーにならない
     const sgMissingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("style-guide.md"),
+      (e) => e.type === "include_missing" && e.message.includes("style-guide.md"),
     );
     expect(sgMissingErrors).toHaveLength(0);
   });

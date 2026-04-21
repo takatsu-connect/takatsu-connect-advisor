@@ -29,11 +29,7 @@ jest.mock("server-only", () => ({}));
 import { mkdtempSync, writeFileSync, utimesSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import path from "path";
-import {
-  loadAgentDefinition,
-  clearAgentCache,
-  getAgentCacheStats,
-} from "@/lib/agents/loader";
+import { loadAgentDefinition, clearAgentCache, getAgentCacheStats } from "@/lib/agents/loader";
 
 // ---------------------------------------------------------------------------
 // テストヘルパー
@@ -237,11 +233,7 @@ describe("loadAgentDefinition (mtime cache)", () => {
   test("8a. 不正な Markdown（frontmatter なし）: parseAgentDefinition のエラーがそのまま throw される", async () => {
     // Arrange: フロントマターブロックなし（必須フィールドが存在しない）
     const file = path.join(tmpDir, "no-frontmatter.md");
-    writeFileSync(
-      file,
-      "あなたは専門家です。フロントマターはありません。",
-      "utf-8"
-    );
+    writeFileSync(file, "あなたは専門家です。フロントマターはありません。", "utf-8");
 
     // Act & Assert: parseAgentDefinition が throw するエラーがそのまま伝播する
     await expect(loadAgentDefinition(file)).rejects.toThrow();
@@ -252,14 +244,10 @@ describe("loadAgentDefinition (mtime cache)", () => {
     const file = path.join(tmpDir, "missing-name.md");
     writeFileSync(
       file,
-      [
-        "---",
-        "displayName: テストエージェント",
-        "description: 説明。",
-        "---",
-        "\n本文\n",
-      ].join("\n"),
-      "utf-8"
+      ["---", "displayName: テストエージェント", "description: 説明。", "---", "\n本文\n"].join(
+        "\n",
+      ),
+      "utf-8",
     );
 
     // Act & Assert
@@ -290,7 +278,7 @@ describe("loadAgentDefinition (mtime cache)", () => {
         "---",
         "\nシステムプロンプト本文\n",
       ].join("\n"),
-      "utf-8"
+      "utf-8",
     );
 
     // Act
@@ -342,7 +330,7 @@ describe("loadAgentDefinition (mtime cache)", () => {
           "",
           "本来のシステムプロンプト本文",
         ].join("\n"),
-        "utf-8"
+        "utf-8",
       );
 
       // Act
@@ -386,7 +374,7 @@ describe("loadAgentDefinition (mtime cache)", () => {
           "",
           "エージェント本文",
         ].join("\n"),
-        "utf-8"
+        "utf-8",
       );
 
       // Act: 初回ロード

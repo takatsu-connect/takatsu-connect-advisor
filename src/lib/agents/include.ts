@@ -38,9 +38,7 @@ const DEFAULT_PROMPTS_DIR = process.env.PROMPTS_DIR
 function validateIncludePath(rel: string, promptsDir: string): void {
   // shared/ で始まらないパスを拒否（path traversal の第一関門）
   if (!rel.startsWith("shared/")) {
-    throw new Error(
-      `[expandIncludes] include パスは "shared/" で始まる必要があります: "${rel}"`,
-    );
+    throw new Error(`[expandIncludes] include パスは "shared/" で始まる必要があります: "${rel}"`);
   }
 
   // path.resolve して promptsDir の外に出ないか検証
@@ -114,9 +112,7 @@ export async function expandIncludes(
     return definition;
   }
 
-  const promptsDir = options?.promptsDir
-    ? path.resolve(options.promptsDir)
-    : DEFAULT_PROMPTS_DIR;
+  const promptsDir = options?.promptsDir ? path.resolve(options.promptsDir) : DEFAULT_PROMPTS_DIR;
 
   const includes = definition.include;
 

@@ -37,23 +37,18 @@ import { loadAgentDefinition, clearAgentCache } from "@/lib/agents/loader";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = process.cwd();
-const DATA_ANALYST_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "agents",
-  "data-analyst.md"
-);
+const DATA_ANALYST_MD_PATH = path.join(PROJECT_ROOT, "prompts", "agents", "data-analyst.md");
 const QUERY_GOOGLE_ANALYTICS_MD_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "tools",
-  "query_google_analytics.md"
+  "query_google_analytics.md",
 );
 const QUERY_SEARCH_CONSOLE_MD_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "tools",
-  "query_search_console.md"
+  "query_search_console.md",
 );
 
 // ---------------------------------------------------------------------------
@@ -68,16 +63,12 @@ describe("data-analyst ファイル存在確認", () => {
 
   test("1-2. prompts/tools/query_google_analytics.md が存在する", async () => {
     // Act & Assert
-    await expect(
-      access(QUERY_GOOGLE_ANALYTICS_MD_PATH)
-    ).resolves.toBeUndefined();
+    await expect(access(QUERY_GOOGLE_ANALYTICS_MD_PATH)).resolves.toBeUndefined();
   });
 
   test("1-3. prompts/tools/query_search_console.md が存在する", async () => {
     // Act & Assert
-    await expect(
-      access(QUERY_SEARCH_CONSOLE_MD_PATH)
-    ).resolves.toBeUndefined();
+    await expect(access(QUERY_SEARCH_CONSOLE_MD_PATH)).resolves.toBeUndefined();
   });
 });
 
@@ -157,10 +148,7 @@ describe("loadAgentDefinition() - include 配列検証", () => {
 
   test("3-1. include に 'shared/takatsu-connect.md' と 'shared/style-guide.md' が含まれる", () => {
     // Arrange
-    const expectedIncludes = [
-      "shared/takatsu-connect.md",
-      "shared/style-guide.md",
-    ];
+    const expectedIncludes = ["shared/takatsu-connect.md", "shared/style-guide.md"];
 
     // Assert
     for (const file of expectedIncludes) {
@@ -193,8 +181,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-1. systemPrompt に 'データ' または '数値' が含まれる（役割説明）", () => {
     // Assert
-    const hasRoleDescription =
-      systemPrompt.includes("データ") || systemPrompt.includes("数値");
+    const hasRoleDescription = systemPrompt.includes("データ") || systemPrompt.includes("数値");
     expect(hasRoleDescription).toBe(true);
   });
 
@@ -205,8 +192,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-3. systemPrompt に '無視' または '上書き' が含まれる（インジェクション対策）", () => {
     // Assert
-    const hasInjectionGuard =
-      systemPrompt.includes("無視") || systemPrompt.includes("上書き");
+    const hasInjectionGuard = systemPrompt.includes("無視") || systemPrompt.includes("上書き");
     expect(hasInjectionGuard).toBe(true);
   });
 

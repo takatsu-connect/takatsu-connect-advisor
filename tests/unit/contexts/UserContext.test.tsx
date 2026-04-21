@@ -45,7 +45,7 @@ describe("UserContext", () => {
       render(
         <UserContextProvider value={testUser}>
           <Consumer />
-        </UserContextProvider>
+        </UserContextProvider>,
       );
 
       expect(screen.getByTestId("user-id")).toHaveTextContent("user-id-123");
@@ -66,7 +66,7 @@ describe("UserContext", () => {
             <Consumer />
             <p>追加の children</p>
           </div>
-        </UserContextProvider>
+        </UserContextProvider>,
       );
 
       expect(screen.getByTestId("email")).toHaveTextContent("another@example.com");
@@ -84,7 +84,7 @@ describe("UserContext", () => {
       render(
         <UserContextProvider value={testUser}>
           <Consumer />
-        </UserContextProvider>
+        </UserContextProvider>,
       );
 
       expect(screen.getByTestId("user-id")).toHaveTextContent("user-id-789");
@@ -161,7 +161,9 @@ describe("UserContext", () => {
       }
 
       expect(caughtError).toBeInstanceOf(Error);
-      expect(caughtError?.message).toBe("useUser は UserContextProvider の内部でのみ使用できます。");
+      expect(caughtError?.message).toBe(
+        "useUser は UserContextProvider の内部でのみ使用できます。",
+      );
     });
 
     it("throw される Error は Error インスタンスである", () => {

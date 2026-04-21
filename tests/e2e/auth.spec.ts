@@ -45,9 +45,7 @@ test.describe("認証フロー", () => {
       await expect(page.getByRole("button", { name: /Googleでログイン/i })).toBeVisible();
     });
 
-    test("未認証時に /login にアクセスしてもリダイレクトループが発生しない", async ({
-      page,
-    }) => {
+    test("未認証時に /login にアクセスしてもリダイレクトループが発生しない", async ({ page }) => {
       // ナビゲーション履歴を収集してループを検知する
       const visitedUrls: string[] = [];
 
