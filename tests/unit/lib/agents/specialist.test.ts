@@ -44,7 +44,7 @@ const mockClassifyApiError = jest.fn((error: unknown) => {
   return "unknown";
 });
 jest.mock("@/lib/claude/api-error", () => ({
-  classifyApiError: (...args: unknown[]) => mockClassifyApiError(...args),
+  classifyApiError: (error: unknown) => mockClassifyApiError(error),
 }));
 
 // ---------------------------------------------------------------------------
