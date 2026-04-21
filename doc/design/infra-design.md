@@ -38,17 +38,16 @@
 
 CLAUDE.md の Git 戦略に準拠。
 
-| ブランチ       | Vercel 環境             | 用途              |
-| -------------- | ----------------------- | ----------------- |
-| `release`      | Production              | 正式版（公開URL） |
-| `preview`      | Preview（固定ドメイン） | 動作確認用        |
-| `dev`          | Preview                 | 開発統合用        |
-| `feature/bd-*` | Preview（PRごと）       | タスク単位の検証  |
+| ブランチ       | Vercel 環境       | 用途              |
+| -------------- | ----------------- | ----------------- |
+| `main`         | Production        | 正式版（公開URL） |
+| `dev`          | Preview           | 開発統合用        |
+| `feature/bd-*` | Preview（PRごと） | タスク単位の検証  |
 
 Vercel 側で以下を設定:
 
-- **Production Branch**: `release`
-- `preview` を **Ignored Build Step 回避リスト**に含めて Preview Deploy 対象
+- **Production Branch**: `main`
+- `dev` を **Ignored Build Step 回避リスト**に含めて Preview Deploy 対象
 - `feature/*` は自動 Preview、PR ごとに URL 発行
 
 ---
@@ -178,7 +177,7 @@ pnpm dev                    # Next.js 起動
 ```yaml
 name: CI
 on:
-  push: { branches: [dev, preview, release] }
+  push: { branches: [dev, main] }
   pull_request:
 jobs:
   check:
@@ -237,7 +236,7 @@ jobs:
 ### 6.2 デプロイ
 
 - Vercel の GitHub 連携で自動デプロイ
-- Production: `release` ブランチへの push
+- Production: `main` ブランチへの push
 - Preview: 他ブランチ / PR
 - Vercel CLI からの手動デプロイはリリース時のみに限定
 

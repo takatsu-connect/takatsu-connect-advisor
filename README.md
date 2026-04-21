@@ -132,7 +132,7 @@ supabase/migrations/     Supabase マイグレーション (SQL)
 
 ## デプロイ
 
-Vercel に接続すると `dev` / `preview` / `release` ブランチが自動デプロイされる。
+Vercel に接続すると `dev` / `main` ブランチが自動デプロイされる。
 
 Vercel の環境変数は `.env.example` を参照して Production / Preview それぞれに登録する。
 
