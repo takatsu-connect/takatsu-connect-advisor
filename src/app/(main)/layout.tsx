@@ -13,11 +13,7 @@ import styles from "./main.module.css";
  * ログイン済みの場合は取得した user 情報を UserContextProvider で
  * クライアントツリー全体に提供する。
  */
-export default async function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const supabase = await supabaseServer();
   const {
     data: { user },

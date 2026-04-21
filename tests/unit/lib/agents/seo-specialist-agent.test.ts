@@ -38,30 +38,15 @@ import { loadAgentDefinition, clearAgentCache } from "@/lib/agents/loader";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = process.cwd();
-const SEO_SPECIALIST_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "agents",
-  "seo-specialist.md"
-);
+const SEO_SPECIALIST_MD_PATH = path.join(PROJECT_ROOT, "prompts", "agents", "seo-specialist.md");
 const QUERY_SEARCH_CONSOLE_MD_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "tools",
-  "query_search_console.md"
+  "query_search_console.md",
 );
-const FETCH_WEBPAGE_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "tools",
-  "fetch_webpage.md"
-);
-const FETCH_WP_POSTS_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "tools",
-  "fetch_wp_posts.md"
-);
+const FETCH_WEBPAGE_MD_PATH = path.join(PROJECT_ROOT, "prompts", "tools", "fetch_webpage.md");
+const FETCH_WP_POSTS_MD_PATH = path.join(PROJECT_ROOT, "prompts", "tools", "fetch_wp_posts.md");
 
 // ---------------------------------------------------------------------------
 // Section 1: ファイル存在確認
@@ -75,9 +60,7 @@ describe("seo-specialist ファイル存在確認", () => {
 
   test("1-2. prompts/tools/query_search_console.md が存在する", async () => {
     // Act & Assert
-    await expect(
-      access(QUERY_SEARCH_CONSOLE_MD_PATH)
-    ).resolves.toBeUndefined();
+    await expect(access(QUERY_SEARCH_CONSOLE_MD_PATH)).resolves.toBeUndefined();
   });
 
   test("1-3. prompts/tools/fetch_webpage.md が存在する", async () => {
@@ -163,10 +146,7 @@ describe("loadAgentDefinition() - include 配列検証", () => {
 
   test("3-1. include に 'shared/takatsu-connect.md' と 'shared/style-guide.md' が含まれる", () => {
     // Arrange
-    const expectedIncludes = [
-      "shared/takatsu-connect.md",
-      "shared/style-guide.md",
-    ];
+    const expectedIncludes = ["shared/takatsu-connect.md", "shared/style-guide.md"];
 
     // Assert
     for (const file of expectedIncludes) {
@@ -194,8 +174,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-1. systemPrompt に 'SEO' または '検索流入' が含まれる（役割説明）", () => {
     // Assert
-    const hasRoleDescription =
-      systemPrompt.includes("SEO") || systemPrompt.includes("検索流入");
+    const hasRoleDescription = systemPrompt.includes("SEO") || systemPrompt.includes("検索流入");
     expect(hasRoleDescription).toBe(true);
   });
 
@@ -206,8 +185,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-3. systemPrompt に '無視' または '上書き' が含まれる（インジェクション対策）", () => {
     // Assert
-    const hasInjectionGuard =
-      systemPrompt.includes("無視") || systemPrompt.includes("上書き");
+    const hasInjectionGuard = systemPrompt.includes("無視") || systemPrompt.includes("上書き");
     expect(hasInjectionGuard).toBe(true);
   });
 });

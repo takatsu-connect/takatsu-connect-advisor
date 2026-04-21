@@ -39,7 +39,7 @@ jest.mock("@/lib/db/supabase-server", () => ({
       auth: {
         getUser: mockGetUser,
       },
-    })
+    }),
   ),
 }));
 
@@ -52,7 +52,7 @@ jest.mock("next/headers", () => ({
     Promise.resolve({
       getAll: () => [],
       set: jest.fn(),
-    })
+    }),
   ),
 }));
 

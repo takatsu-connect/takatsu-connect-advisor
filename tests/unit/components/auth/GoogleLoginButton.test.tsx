@@ -109,9 +109,7 @@ describe("GoogleLoginButton", () => {
 
       await waitFor(() => {
         const callArgs = mockSignInWithOAuth.mock.calls[0][0];
-        expect(callArgs.options.redirectTo).toBe(
-          "http://localhost/auth/callback?next=/chat"
-        );
+        expect(callArgs.options.redirectTo).toBe("http://localhost/auth/callback?next=/chat");
       });
     });
 
@@ -150,7 +148,7 @@ describe("GoogleLoginButton", () => {
       await user.click(screen.getByRole("button", { name: /Googleでログイン/i }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Googleログインに失敗しました。しばらく経ってから再度お試しください。"
+        "Googleログインに失敗しました。しばらく経ってから再度お試しください。",
       );
       // isLoading が false に戻りボタンが再度有効になっていること
       await waitFor(() => {
@@ -171,7 +169,7 @@ describe("GoogleLoginButton", () => {
       await user.click(screen.getByRole("button", { name: /Googleでログイン/i }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Googleログインに失敗しました。しばらく経ってから再度お試しください。"
+        "Googleログインに失敗しました。しばらく経ってから再度お試しください。",
       );
       await waitFor(() => {
         expect(screen.getByRole("button", { name: /Googleでログイン/i })).not.toBeDisabled();

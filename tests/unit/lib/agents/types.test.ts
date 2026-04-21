@@ -184,12 +184,7 @@ describe("ToolCallLog", () => {
 
 describe("SpecialistResultStatus", () => {
   test("union の 4 値すべてを格納できる", () => {
-    const statuses: SpecialistResultStatus[] = [
-      "ok",
-      "timeout",
-      "error",
-      "skipped",
-    ];
+    const statuses: SpecialistResultStatus[] = ["ok", "timeout", "error", "skipped"];
     expect(statuses).toHaveLength(4);
   });
 });
@@ -267,9 +262,7 @@ describe("SpecialistResult", () => {
       displayName: "SEO専門家",
       status: "ok",
       summary: "回答サマリ",
-      toolCalls: [
-        { tool: "fetch_webpage", input: {}, ok: true, ms: 500 },
-      ],
+      toolCalls: [{ tool: "fetch_webpage", input: {}, ok: true, ms: 500 }],
       latencyMs: 2000,
       usage,
     };

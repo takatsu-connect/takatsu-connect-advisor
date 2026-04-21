@@ -41,7 +41,7 @@ const CLASSIFIER_AGENTS_LIST_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "shared",
-  "classifier-agents-list.md"
+  "classifier-agents-list.md",
 );
 
 // ---------------------------------------------------------------------------
@@ -131,15 +131,13 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("3-1. systemPrompt に '専門家' または '振り分け' が含まれる（役割説明）", () => {
     // Assert
-    const hasRoleDescription =
-      systemPrompt.includes("専門家") || systemPrompt.includes("振り分け");
+    const hasRoleDescription = systemPrompt.includes("専門家") || systemPrompt.includes("振り分け");
     expect(hasRoleDescription).toBe(true);
   });
 
   test("3-2. systemPrompt に 'JSON' または '{' が含まれる（出力形式指示）", () => {
     // Assert
-    const hasOutputFormat =
-      systemPrompt.includes("JSON") || systemPrompt.includes("{");
+    const hasOutputFormat = systemPrompt.includes("JSON") || systemPrompt.includes("{");
     expect(hasOutputFormat).toBe(true);
   });
 

@@ -1,8 +1,4 @@
-import {
-  APIError,
-  APIConnectionError,
-  APIConnectionTimeoutError,
-} from "@anthropic-ai/sdk";
+import { APIError, APIConnectionError, APIConnectionTimeoutError } from "@anthropic-ai/sdk";
 
 export type ApiErrorKind =
   | "rate_limit"
@@ -39,12 +35,7 @@ export function classifyApiError(error: unknown): ApiErrorKind {
     if (status === 429) {
       return "rate_limit";
     }
-    if (
-      status === 500 ||
-      status === 502 ||
-      status === 503 ||
-      status === 504
-    ) {
+    if (status === 500 || status === 502 || status === 503 || status === 504) {
       return "server_error";
     }
     return "unknown";

@@ -82,9 +82,7 @@ describe("ClaudeMessage", () => {
 
   test("2-2. role: 'assistant' + content: ClaudeContentBlock[] が型適合する", () => {
     // Arrange
-    const blocks: ClaudeContentBlock[] = [
-      { type: "text", text: "回答テキスト" },
-    ];
+    const blocks: ClaudeContentBlock[] = [{ type: "text", text: "回答テキスト" }];
 
     // Act
     const message: ClaudeMessage = {
@@ -188,11 +186,7 @@ describe("ClaudeContentBlock discriminated union", () => {
     }
 
     // Assert
-    expect(results).toEqual([
-      "text:テキスト",
-      "tool_use:fn",
-      "tool_result:id1",
-    ]);
+    expect(results).toEqual(["text:テキスト", "tool_use:fn", "tool_result:id1"]);
   });
 });
 
@@ -203,12 +197,7 @@ describe("ClaudeContentBlock discriminated union", () => {
 describe("ClaudeStopReason", () => {
   test("4-1. 定義された4つのリテラル値がすべて型適合する", () => {
     // Arrange & Act
-    const reasons: ClaudeStopReason[] = [
-      "end_turn",
-      "tool_use",
-      "max_tokens",
-      "stop_sequence",
-    ];
+    const reasons: ClaudeStopReason[] = ["end_turn", "tool_use", "max_tokens", "stop_sequence"];
 
     // Assert: 4つすべてが存在し、適切な文字列であること
     expect(reasons).toHaveLength(4);

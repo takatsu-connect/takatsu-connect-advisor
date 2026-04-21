@@ -52,9 +52,7 @@ function makeHeaders(extra?: Record<string, string>): Headers {
 }
 
 function makeRateLimitError(retryAfter?: string): RateLimitError {
-  const headers = retryAfter
-    ? makeHeaders({ "retry-after": retryAfter })
-    : makeHeaders();
+  const headers = retryAfter ? makeHeaders({ "retry-after": retryAfter }) : makeHeaders();
   return new RateLimitError(429, {}, "Rate limit exceeded", headers);
 }
 
@@ -152,10 +150,7 @@ describe("withRetry - リトライ可能エラー", () => {
     // Act & Assert: rejects の検証と runAllTimersAsync を並行実行することで
     // unhandled rejection (PromiseRejectionHandledWarning) を回避する
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(RETRY_CONFIG.maxAttempts);
   });
 
@@ -166,10 +161,7 @@ describe("withRetry - リトライ可能エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(RETRY_CONFIG.maxAttempts);
   });
 
@@ -180,10 +172,7 @@ describe("withRetry - リトライ可能エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(RETRY_CONFIG.maxAttempts);
   });
 
@@ -197,10 +186,7 @@ describe("withRetry - リトライ可能エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(RETRY_CONFIG.maxAttempts);
   });
 
@@ -213,10 +199,7 @@ describe("withRetry - リトライ可能エラー", () => {
 
       // Act & Assert
       const promise = withRetry(fn);
-      await Promise.all([
-        expect(promise).rejects.toThrow(error),
-        jest.runAllTimersAsync(),
-      ]);
+      await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
       expect(fn).toHaveBeenCalledTimes(RETRY_CONFIG.maxAttempts);
     },
   );
@@ -234,10 +217,7 @@ describe("withRetry - リトライ不可エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -248,10 +228,7 @@ describe("withRetry - リトライ不可エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -262,10 +239,7 @@ describe("withRetry - リトライ不可エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -277,10 +251,7 @@ describe("withRetry - リトライ不可エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -294,10 +265,7 @@ describe("withRetry - リトライ不可エラー", () => {
 
     // Act & Assert
     const promise = withRetry(fn);
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });
@@ -370,10 +338,7 @@ describe("withRetry - config override", () => {
 
     // Act & Assert
     const promise = withRetry(fn, { maxAttempts: 1 });
-    await Promise.all([
-      expect(promise).rejects.toThrow(error),
-      jest.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise).rejects.toThrow(error), jest.runAllTimersAsync()]);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });

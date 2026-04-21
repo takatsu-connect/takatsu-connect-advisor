@@ -82,7 +82,9 @@ describe("cacheKey - 正常系", () => {
     // role と content の順序を入れ替えたオブジェクト
     const inputB: CacheKeyInput = {
       model: "claude-sonnet-4-6",
-      messages: [{ content: "Hello", role: "user" } as { role: "user" | "assistant"; content: unknown }],
+      messages: [
+        { content: "Hello", role: "user" } as { role: "user" | "assistant"; content: unknown },
+      ],
     };
 
     // Act
@@ -95,8 +97,16 @@ describe("cacheKey - 正常系", () => {
 
   test("5. tools 配列: 同じ内容の tools でキー順序に依存しないハッシュ", () => {
     // Arrange
-    const toolA = { name: "search", description: "Search the web", input_schema: { type: "object" } };
-    const toolB = { description: "Search the web", name: "search", input_schema: { type: "object" } };
+    const toolA = {
+      name: "search",
+      description: "Search the web",
+      input_schema: { type: "object" },
+    };
+    const toolB = {
+      description: "Search the web",
+      name: "search",
+      input_schema: { type: "object" },
+    };
 
     const inputA: CacheKeyInput = {
       model: "claude-sonnet-4-6",
@@ -355,9 +365,7 @@ describe("cacheKey - cache_control 除外", () => {
       messages: [
         {
           role: "user",
-          content: [
-            { type: "text", text: "Hello" },
-          ],
+          content: [{ type: "text", text: "Hello" }],
         },
       ],
     };

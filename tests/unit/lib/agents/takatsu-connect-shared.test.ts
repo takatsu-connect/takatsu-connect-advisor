@@ -27,12 +27,7 @@ import { validateAllAgents } from "@/lib/agents/validate";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = path.resolve(__dirname, "../../../../");
-const SHARED_FILE_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "shared",
-  "takatsu-connect.md",
-);
+const SHARED_FILE_PATH = path.join(PROJECT_ROOT, "prompts", "shared", "takatsu-connect.md");
 
 // ---------------------------------------------------------------------------
 // テスト本体
@@ -229,9 +224,7 @@ describe("validateAllAgents による takatsu-connect.md の include 参照整�
 
     // Assert: takatsu-connect.md に関する include_missing エラーが出ない
     const includeMissingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("takatsu-connect.md"),
+      (e) => e.type === "include_missing" && e.message.includes("takatsu-connect.md"),
     );
     expect(includeMissingErrors).toHaveLength(0);
   });
@@ -245,9 +238,7 @@ describe("validateAllAgents による takatsu-connect.md の include 参照整�
 
     // Assert: agents_dir_missing が出ず、agentCount が 1 であること
     // （prompts/agents/ に .md ファイルが1件配置されているため）
-    const agentsDirWarning = result.warnings.find(
-      (w) => w.type === "agents_dir_missing",
-    );
+    const agentsDirWarning = result.warnings.find((w) => w.type === "agents_dir_missing");
     expect(agentsDirWarning).toBeUndefined();
     expect(result.agentCount).toBe(1);
   });
@@ -281,17 +272,13 @@ describe("validateAllAgents による takatsu-connect.md の include 参照整�
     // Assert: does-not-exist.md に関する include_missing エラーが検出される
     // （include 解決ロジックが実際に動作している証拠）
     const missingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("does-not-exist.md"),
+      (e) => e.type === "include_missing" && e.message.includes("does-not-exist.md"),
     );
     expect(missingErrors.length).toBeGreaterThan(0);
 
     // takatsu-connect.md 自体は存在するのでエラーにならない
     const tcMissingErrors = result.errors.filter(
-      (e) =>
-        e.type === "include_missing" &&
-        e.message.includes("takatsu-connect.md"),
+      (e) => e.type === "include_missing" && e.message.includes("takatsu-connect.md"),
     );
     expect(tcMissingErrors).toHaveLength(0);
   });

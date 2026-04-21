@@ -21,10 +21,7 @@ import { supabaseMiddleware } from "@/lib/db/supabase-middleware";
  * トークンリフレッシュ直後にリダイレクトが発生した場合に
  * 新しいセッション Cookie がブラウザに届かなくなる。
  */
-function redirectWithCookies(
-  supabaseResponse: NextResponse,
-  url: URL
-): NextResponse {
+function redirectWithCookies(supabaseResponse: NextResponse, url: URL): NextResponse {
   const redirectResponse = NextResponse.redirect(url);
   supabaseResponse.cookies.getAll().forEach((cookie) => {
     redirectResponse.cookies.set(cookie);
@@ -75,10 +72,5 @@ export function isProtectedPath(pathname: string): boolean {
 }
 
 export const config = {
-  matcher: [
-    "/chat/:path*",
-    "/api/chat/:path*",
-    "/api/sessions/:path*",
-    "/login",
-  ],
+  matcher: ["/chat/:path*", "/api/chat/:path*", "/api/sessions/:path*", "/login"],
 };

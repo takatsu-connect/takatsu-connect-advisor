@@ -54,20 +54,13 @@ export type ClaudeToolResultBlock = {
   is_error?: boolean;
 };
 
-export type ClaudeContentBlock =
-  | ClaudeTextBlock
-  | ClaudeToolUseBlock
-  | ClaudeToolResultBlock;
+export type ClaudeContentBlock = ClaudeTextBlock | ClaudeToolUseBlock | ClaudeToolResultBlock;
 
 // ---------------------------------------------------------------------------
 // 停止理由
 // ---------------------------------------------------------------------------
 
-export type ClaudeStopReason =
-  | "end_turn"
-  | "tool_use"
-  | "max_tokens"
-  | "stop_sequence";
+export type ClaudeStopReason = "end_turn" | "tool_use" | "max_tokens" | "stop_sequence";
 
 // ---------------------------------------------------------------------------
 // ストリーミング

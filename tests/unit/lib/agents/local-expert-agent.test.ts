@@ -36,18 +36,8 @@ import { loadAgentDefinition, clearAgentCache } from "@/lib/agents/loader";
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = process.cwd();
-const LOCAL_EXPERT_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "agents",
-  "local-expert.md"
-);
-const FETCH_WP_POSTS_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "tools",
-  "fetch_wp_posts.md"
-);
+const LOCAL_EXPERT_MD_PATH = path.join(PROJECT_ROOT, "prompts", "agents", "local-expert.md");
+const FETCH_WP_POSTS_MD_PATH = path.join(PROJECT_ROOT, "prompts", "tools", "fetch_wp_posts.md");
 
 // ---------------------------------------------------------------------------
 // Section 1: ファイル存在確認
@@ -140,10 +130,7 @@ describe("loadAgentDefinition() - include 配列検証", () => {
 
   test("3-1. include に 'shared/takatsu-connect.md' と 'shared/style-guide.md' が含まれる", () => {
     // Arrange
-    const expectedIncludes = [
-      "shared/takatsu-connect.md",
-      "shared/style-guide.md",
-    ];
+    const expectedIncludes = ["shared/takatsu-connect.md", "shared/style-guide.md"];
 
     // Assert
     for (const file of expectedIncludes) {
@@ -176,8 +163,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-1. systemPrompt に '地域' または '高津区' が含まれる（役割説明）", () => {
     // Assert
-    const hasRoleDescription =
-      systemPrompt.includes("地域") || systemPrompt.includes("高津区");
+    const hasRoleDescription = systemPrompt.includes("地域") || systemPrompt.includes("高津区");
     expect(hasRoleDescription).toBe(true);
   });
 
@@ -198,8 +184,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-4. systemPrompt に '無視' または '上書き' が含まれる（インジェクション対策）", () => {
     // Assert
-    const hasInjectionGuard =
-      systemPrompt.includes("無視") || systemPrompt.includes("上書き");
+    const hasInjectionGuard = systemPrompt.includes("無視") || systemPrompt.includes("上書き");
     expect(hasInjectionGuard).toBe(true);
   });
 });

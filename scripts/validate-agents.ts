@@ -21,10 +21,7 @@
 
 import path from "node:path";
 import { validateAllAgents } from "../src/lib/agents/validate";
-import type {
-  ValidationError,
-  ValidationWarning,
-} from "../src/lib/agents/validate";
+import type { ValidationError, ValidationWarning } from "../src/lib/agents/validate";
 
 // ---------------------------------------------------------------------------
 // 出力ユーティリティ
@@ -70,9 +67,7 @@ export async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log(
-    `✅ Validation passed: ${result.agentCount} agents, 0 errors`,
-  );
+  console.log(`✅ Validation passed: ${result.agentCount} agents, 0 errors`);
   process.exit(0);
 }
 

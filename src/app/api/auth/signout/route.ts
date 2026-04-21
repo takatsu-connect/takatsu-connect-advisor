@@ -17,7 +17,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const supabase = await supabaseServer();
 
     // 認証チェック: 未認証または取得エラーの場合は 401 を返す
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || user === null) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }

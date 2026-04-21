@@ -41,19 +41,14 @@ const CONTENT_STRATEGIST_MD_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "agents",
-  "content-strategist.md"
+  "content-strategist.md",
 );
-const FETCH_WP_POSTS_MD_PATH = path.join(
-  PROJECT_ROOT,
-  "prompts",
-  "tools",
-  "fetch_wp_posts.md"
-);
+const FETCH_WP_POSTS_MD_PATH = path.join(PROJECT_ROOT, "prompts", "tools", "fetch_wp_posts.md");
 const QUERY_GOOGLE_ANALYTICS_MD_PATH = path.join(
   PROJECT_ROOT,
   "prompts",
   "tools",
-  "query_google_analytics.md"
+  "query_google_analytics.md",
 );
 
 // ---------------------------------------------------------------------------
@@ -73,9 +68,7 @@ describe("content-strategist ファイル存在確認", () => {
 
   test("1-3. prompts/tools/query_google_analytics.md が存在する", async () => {
     // Act & Assert
-    await expect(
-      access(QUERY_GOOGLE_ANALYTICS_MD_PATH)
-    ).resolves.toBeUndefined();
+    await expect(access(QUERY_GOOGLE_ANALYTICS_MD_PATH)).resolves.toBeUndefined();
   });
 });
 
@@ -155,10 +148,7 @@ describe("loadAgentDefinition() - include 配列検証", () => {
 
   test("3-1. include に 'shared/takatsu-connect.md' と 'shared/style-guide.md' が含まれる", () => {
     // Arrange
-    const expectedIncludes = [
-      "shared/takatsu-connect.md",
-      "shared/style-guide.md",
-    ];
+    const expectedIncludes = ["shared/takatsu-connect.md", "shared/style-guide.md"];
 
     // Assert
     for (const file of expectedIncludes) {
@@ -210,8 +200,7 @@ describe("loadAgentDefinition() - systemPrompt 内容確認", () => {
 
   test("4-4. systemPrompt に '無視' または '上書き' が含まれる（インジェクション対策）", () => {
     // Assert
-    const hasInjectionGuard =
-      systemPrompt.includes("無視") || systemPrompt.includes("上書き");
+    const hasInjectionGuard = systemPrompt.includes("無視") || systemPrompt.includes("上書き");
     expect(hasInjectionGuard).toBe(true);
   });
 });

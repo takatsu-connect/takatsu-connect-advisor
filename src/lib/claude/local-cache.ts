@@ -51,9 +51,7 @@ export class LocalCache<T = unknown> {
     /** ストレージ実装の DI。未指定時は MapCacheStorage を使用 */
     storage?: CacheStorage<LocalCacheEntry<T>>;
   }) {
-    const ttlSecs =
-      options?.ttlSecs ??
-      Number(process.env.LOCAL_CACHE_TTL_SECS ?? 30);
+    const ttlSecs = options?.ttlSecs ?? Number(process.env.LOCAL_CACHE_TTL_SECS ?? 30);
 
     // NaN や 0 以下の値はデフォルト 30 秒にフォールバック
     this.ttlMs = (Number.isFinite(ttlSecs) && ttlSecs > 0 ? ttlSecs : 30) * 1000;
