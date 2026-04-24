@@ -83,6 +83,25 @@ describe("withCacheControl", () => {
     expect((result as Record<string, unknown>).name).toBe("extra");
     expect(result.cache_control).toEqual(EPHEMERAL);
   });
+
+  test("35. 冪等性: 既に cache_control: { type: 'ephemeral' } を持つオブジェクトへの再適用で正しく動作する", () => {
+    // Arrange
+    const block = {
+      type: "text" as const,
+      text: "hello",
+      cache_control: { type: "ephemeral" } as { type: "ephemeral" },
+    };
+
+    // Act
+    const result = withCacheControl(block);
+
+    // Assert
+    expect(result.cache_control).toEqual(EPHEMERAL);
+    expect(result.text).toBe("hello");
+    expect((block as Record<string, unknown>).cache_control).toEqual(EPHEMERAL);
+    // 元オブジェクトが mutate されていない（新しいオブジェクトが返る）
+    expect(result).not.toBe(block);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -331,6 +350,80 @@ describe("withCacheControlOnLastContentBlock", () => {
 
     // Assert
     expect(result).toBe(message);
+  });
+
+  test("31. content 末尾が tool_use ブロック: cache_control が付与される", () => {
+    // Arrange
+    const message: MessageParam = {
+      role: "assistant",
+      content: [
+        { type: "text", text: "計算します" },
+        { type: "tool_use", id: "toolu_1", name: "calc", input: { x: 1 } },
+      ],
+    };
+
+    // Act
+    const result = withCacheControlOnLastContentBlock(message);
+    const content = result.content as ContentBlockParam[];
+
+    // Assert
+    expect((content[1] as Record<string, unknown>).cache_control).toEqual(EPHEMERAL);
+    expect((content[0] as Record<string, unknown>).cache_control).toBeUndefined();
+  });
+
+  test("32. content 末尾が tool_result ブロック: cache_control が付与される", () => {
+    // Arrange
+    const message: MessageParam = {
+      role: "user",
+      content: [{ type: "tool_result", tool_use_id: "toolu_1", content: "42" }],
+    };
+
+    // Act
+    const result = withCacheControlOnLastContentBlock(message);
+    const content = result.content as ContentBlockParam[];
+
+    // Assert
+    expect((content[0] as Record<string, unknown>).cache_control).toEqual(EPHEMERAL);
+  });
+
+  test("33. content 末尾が image ブロック: cache_control が付与される", () => {
+    // Arrange
+    const message: MessageParam = {
+      role: "user",
+      content: [
+        {
+          type: "image",
+          source: { type: "base64", media_type: "image/png", data: "iVBORw0KGgo=" },
+        },
+      ],
+    };
+
+    // Act
+    const result = withCacheControlOnLastContentBlock(message);
+    const content = result.content as ContentBlockParam[];
+
+    // Assert
+    expect((content[0] as Record<string, unknown>).cache_control).toEqual(EPHEMERAL);
+  });
+
+  test("34. content が [text, thinking] 配列: thinking が末尾のため元の MessageParam がそのまま返る（同一参照）", () => {
+    // Arrange
+    const message: MessageParam = {
+      role: "assistant",
+      content: [
+        { type: "text", text: "考え中" },
+        { type: "thinking", thinking: "...", signature: "sig" },
+      ],
+    };
+
+    // Act
+    const result = withCacheControlOnLastContentBlock(message);
+    const content = result.content as ContentBlockParam[];
+
+    // Assert
+    expect(result).toBe(message);
+    expect((content[0] as Record<string, unknown>).cache_control).toBeUndefined();
+    expect((content[1] as Record<string, unknown>).cache_control).toBeUndefined();
   });
 
   test("21. content 末尾が thinking 型: cache_control 非対応のため元の MessageParam が返る", () => {
