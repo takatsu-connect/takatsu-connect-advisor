@@ -1,4 +1,7 @@
 {
-  "database": "beads.db",
-  "jsonl_export": "issues.jsonl"
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "takatsu_connect_advisor",
+  "project_id": "db3bed45-3c16-47fa-b442-69df6db7a8d9"
 }

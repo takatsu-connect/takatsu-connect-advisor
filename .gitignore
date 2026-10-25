@@ -49,3 +49,7 @@ next-env.d.ts
 
 # husky internal cache
 .husky/_/
+
+# bd (beads) 1.3.2 runtime files
+*.gate.lock*
+.beads-credential-key
